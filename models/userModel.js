@@ -25,12 +25,33 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    role: {type: String, default: 'user'},
-    gender: {type: String},
-    dob: {type: Date},
-    address: {type: String, default: ''}
+    avatar:{
+        type:Object,
+        default:{}
+    },
+    cover:{
+        type: Object,
+        default:{}
+    },
+    role: {
+        type: String, 
+        default: 'user'
+    },
+    gender: {
+        type: String,
+        required: true
+    },
+    dob: {
+        type: Date,
+        required: true
+    },
+    address: {
+        type: String, 
+        default: ''
+    }
 }, {
-    timestamps: true
+    timestamps: true,
+    minimize:false
 })
 
 

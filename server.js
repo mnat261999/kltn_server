@@ -11,6 +11,7 @@ app.use(cors())
 app.use(cookieParser())
 app.use('/api/user', require('./routes/userRouter'))
 app.use('/api/upload', require('./routes/uploadRouter'))
+app.use('/api/avatar', require('./routes/avatarRouter'))
 
 
 

@@ -1,12 +1,12 @@
 const mongoose = require('mongoose')
 
 
-const avatarSchema = new mongoose.Schema({
+const coverSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'user',
     },
-    avatar:{
+    cover:{
         type: Object,
         required: true   
     }
@@ -15,4 +15,4 @@ const avatarSchema = new mongoose.Schema({
 })
 
 
-module.exports = mongoose.model('avatar', avatarSchema)
+module.exports = mongoose.model('cover', coverSchema)

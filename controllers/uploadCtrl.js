@@ -12,11 +12,14 @@ const uploadCtrl = {
     uploadAvatar:async (req, res) =>{
         try {
             const files = req.files; 
-            const urls = []
+            if(files[0].mimetype !== 'image/jpeg' && files[0].mimetype !== 'image/png'){
+                return res.status(400).json({msg: "File format is incorrect."})
+            }
+            const avatars = []
 
             for(var i = 0; i<files.length;i++){
                 const params = {
-                    Bucket: process.env.AWS_PUBLIC_BUCKET_NAME,
+                    Bucket: `${process.env.AWS_PUBLIC_BUCKET_NAME}/avatar`,
                     Key: `${uuidv4()}${files[i].originalname}`,
                     Body: `${uuidv4()}-${files[i].originalname}`,
                     ACL:'public-read-write'
@@ -24,10 +27,15 @@ const uploadCtrl = {
 
                 const uploadResult = await s3.upload(params).promise();
 
-                urls.push(uploadResult.Location)
+                const avatar = {
+                    key: uploadResult.Key,
+                    url: uploadResult.Location
+                }
+
+                avatars.push(avatar)
             }
 
-            res.json({url:urls[0]})
+            res.json({avatar:avatars[0]})
         
         } catch (err) {
             return res.status(500).json({msg: err.message})

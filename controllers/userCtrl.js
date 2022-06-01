@@ -11,9 +11,9 @@ const userCtrl = {
     register: async (req, res) => {
         try {
 
-            const {fullname, username, email, password} = req.body 
+            const {fullname, username, email, password, dob, gender} = req.body 
 
-            if(!fullname || !username || !email || !password)
+            if(!fullname || !username || !email || !password || !dob || !gender)
             return res.status(400).json({msg: "Please fill in all fields."})
 
             if(!validateEmail(email))
@@ -28,12 +28,14 @@ const userCtrl = {
 
             const passwordHash = await bcrypt.hash(password, 12) 
 
+            const format_dob = Date(dob)
+
             const newUser = {
-                fullname, username, email, password: passwordHash
+                fullname, username, email, password: passwordHash,dob:format_dob, gender
             }
 
             const activation_token = createActivationToken(newUser)
-            console.log(CLIENT_URL)
+ 
             const url = `${CLIENT_URL}/user/activate/${activation_token}`
 
 
@@ -49,12 +51,14 @@ const userCtrl = {
             const {activation_token} = req.body
             const user = jwt.verify(activation_token, process.env.ACTIVATION_TOKEN_SECRET)
 
-            const {fullname, username, email, password} = user
+            const {fullname, username, email, password, dob, gender} = user
             const check = await Users.findOne({email})
             if(check) return res.status(400).json({msg: "This email already exists."})
 
+            const format_dob = Date(dob)
+
             const newUser = new Users({
-                fullname, username, email, password
+                fullname, username, email, password, dob:format_dob, gender
             })
 
             await newUser.save() 
@@ -82,7 +86,7 @@ const userCtrl = {
                 maxAge: 7*24*60*60*1000 //7 days
             })
 
-            console.log(user)
+            //console.log(user)
             res.json({
                 msg: "Login success!",
                 access_token: access_token
