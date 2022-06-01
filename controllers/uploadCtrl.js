@@ -40,6 +40,38 @@ const uploadCtrl = {
         } catch (err) {
             return res.status(500).json({msg: err.message})
         }
+    },
+    uploadCover: async (req, res) => {
+        try {
+            const files = req.files; 
+            if(files[0].mimetype !== 'image/jpeg' && files[0].mimetype !== 'image/png'){
+                return res.status(400).json({msg: "File format is incorrect."})
+            }
+            const covers = []
+
+            for(var i = 0; i<files.length;i++){
+                const params = {
+                    Bucket: `${process.env.AWS_PUBLIC_BUCKET_NAME}/cover`,
+                    Key: `${uuidv4()}${files[i].originalname}`,
+                    Body: `${uuidv4()}-${files[i].originalname}`,
+                    ACL:'public-read-write'
+                };
+
+                const uploadResult = await s3.upload(params).promise();
+
+                const cover = {
+                    key: uploadResult.Key,
+                    url: uploadResult.Location
+                }
+
+                covers.push(cover)
+            }
+
+            res.json({cover:covers[0]})
+        
+        } catch (err) {
+            return res.status(500).json({msg: err.message})
+        }
     }
 }
 
