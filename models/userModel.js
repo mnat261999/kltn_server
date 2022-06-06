@@ -61,8 +61,13 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'user'
     }],
-    saved: [{
-        type: mongoose.Schema.Types.ObjectId, ref: 'user'
+    blockedUsers:[{
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'user'
+    }],
+    request: [{
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'user'
     }]
 }, {
     timestamps: true,
