@@ -48,7 +48,22 @@ const userSchema = new mongoose.Schema({
     address: {
         type: String, 
         default: ''
-    }
+    },
+    website: {
+        type: String, 
+        default: ''
+    },
+    followers: [{
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'user'
+    }],
+    following: [{
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'user'
+    }],
+    saved: [{
+        type: mongoose.Schema.Types.ObjectId, ref: 'user'
+    }]
 }, {
     timestamps: true,
     minimize:false

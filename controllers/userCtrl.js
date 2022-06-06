@@ -95,7 +95,7 @@ const userCtrl = {
             return res.status(500).json({msg: err.message})
         }
     },
-    getAccessToken: (req, res) =>{
+    getAccessToken: async (req, res) =>{
         try {
             const rf_token = req.cookies.refreshtoken
 
