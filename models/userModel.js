@@ -65,6 +65,10 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'user'
     }],
+    blockedBy:[{
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'user'
+    }],
     request: [{
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'user'

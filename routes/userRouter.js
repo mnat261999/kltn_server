@@ -15,5 +15,6 @@ router.post('/logout',userCtrl.logout)
 router.put('/block/:id', auth, userCtrl.blockUser)
 router.put('/unblock/:id', auth, userCtrl.unblockUser)
 router.get('/list/block', auth, userCtrl.getListBlockByUser)
+router.get('/search_user', auth, userCtrl.searchUser)
 
 module.exports = router

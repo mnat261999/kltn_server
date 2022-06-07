@@ -179,20 +179,30 @@ const userCtrl = {
     },
     blockUser: async (req, res) => {
         try {
-            Users.findOneAndUpdate(
-                { "_id": req.user.id },
-                { $pull: { followings: req.params.id, followers: req.params.id }, $push: { blockedUsers: req.params.id } },
-                { new: true },
-                (err, user) => {
-                    if (err) return res.status(400).json({ success: false });
-                    Users.findOneAndUpdate(
-                        { "_id": req.params.id },
-                        { $pull: { followers: req.user._id, followings: req.user._id } },
-                        { new: true }, (err, results) => {
-                            if (err) return res.status(400).json({ success: false });
-                            return res.status(200).json({ success: true, userId: req.params.id })
-                        })
+            const user = await Users.findById(req.user.id)
+
+            const userBlock = await Users.findById(req.params.id)
+
+            if (user.blockedUsers.some(id => id == req.params.id) == true) {
+                return res.status(400).json({ success: false})
+            } else if(userBlock.blockedUsers.some(id => id == req.user.id) == true) {
+                return res.status(400).json({ success: false})
+            } else {
+                Users.findOneAndUpdate(
+                    { "_id": req.user.id },
+                    { $pull: { followings: req.params.id, followers: req.params.id }, $push: { blockedUsers: req.params.id }},
+                    { new: true },
+                    (err, user) => {
+                        if (err) return res.status(400).json({ success: false });
+                        Users.findOneAndUpdate(
+                            { "_id": req.params.id },
+                            { $pull: { followers: req.user.id, followings: req.user.id }, $push: { blockedBy: req.user.id } },
+                            { new: true }, (err, results) => {
+                                if (err) return res.status(400).json({ success: false });
+                                return res.status(200).json({ success: true, userId: req.params.id })
+                            })
                 })
+            }
         } catch (err) {
             return res.status(500).json({ msg: err.message })
         }
@@ -205,23 +215,62 @@ const userCtrl = {
                 { new: true },
                 (err, user) => {
                     if (err) return res.status(400).json({ success: false });
-                    return res.status(200).json({ success: true, userId: req.params.id })
+                    Users.findOneAndUpdate(
+                        { "_id": req.params.id },
+                        { $pull: { blockedBy: req.user.id } },
+                        { new: true }, (err, results) => {
+                            if (err) return res.status(400).json({ success: false });
+                            return res.status(200).json({ success: true, userId: req.params.id })
+                        })
                 })
         } catch (err) {
             return res.status(500).json({ msg: err.message })
         }
     },
-    getListBlockByUser: async (req, res) =>{
+    getListBlockByUser: async (req, res) => {
         try {
             const user = await Users.findById(req.user.id)
 
             Users.find({ "_id": { $in: user.blockedUsers } })
-            .select('username _id avatar')
-            .exec((err, users) => {
-                console.log(err)
-                if (err) return res.status(400).send(err);
-                res.json(users);
-            })
+                .select('username _id avatar')
+                .exec((err, users) => {
+                    console.log(err)
+                    if (err) return res.status(400).send(err);
+                    return res.status(200).json({users});
+                })
+        } catch (err) {
+            return res.status(500).json({ msg: err.message })
+        }
+    },
+    searchUser: async (req, res) => {
+        try {
+            let limit = req.query.limit ? parseInt(req.query.limit) : 3;
+            let skip = req.query.skip ? parseInt(req.query.skip) : 0;
+
+            const matchRegex = new RegExp(req.query.keyword);
+
+            const user = await Users.findById(req.user.id)
+
+            const blockedUsers = user.blockedUsers
+
+            const blockedBy = user.blockedBy
+
+            const blockList = blockedUsers.concat(blockedBy)
+
+            const users = await Users.find(
+                { $or:[
+                    {username:{$regex:  matchRegex, $options: 'i' }},
+                    {fullname:{$regex:  matchRegex, $options: 'i' }}
+                ],
+                _id: { $nin: blockList } }
+                )
+                .skip(skip)
+                                    
+                .limit(limit)
+                                    
+                .select("_id avatar fullname username")
+
+            return res.status(200).json({ users })
         } catch (err) {
             return res.status(500).json({ msg: err.message })
         }
