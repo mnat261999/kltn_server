@@ -274,6 +274,30 @@ const userCtrl = {
         } catch (err) {
             return res.status(500).json({ msg: err.message })
         }
+    },
+    getUserInfor: async (req, res) => {
+        try {
+            const user = await Users.findById(req.user.id)
+
+            const blockedUsers = user.blockedUsers
+
+            const blockedBy = user.blockedBy
+
+            const blockList = blockedUsers.concat(blockedBy)
+
+            const userInfor = await Users.find({
+                $and:[
+                    {_id: req.params.id},
+                    {_id: {$nin: blockList}}
+                ]
+            })
+            .select('-password -request -blockedBy')
+                                         
+            return res.status(200).json({ userInfor })
+            
+        } catch (err) {
+            return res.status(500).json({ msg: err.message })
+        }
     }
 }
 
