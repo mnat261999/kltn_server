@@ -1,37 +1,37 @@
-require('dotenv').config()
-const express = require('express')
-const mongoose = require('mongoose')
-const cors = require('cors')
-const cookieParser = require('cookie-parser')
+require("dotenv").config();
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
 
-
-const app = express()
-app.use(express.json())
-app.use(cors())
-app.use(cookieParser())
-app.use('/api/user', require('./routes/userRouter'))
-app.use('/api/upload', require('./routes/uploadRouter'))
-app.use('/api/avatar', require('./routes/avatarRouter'))
-app.use('/api/cover', require('./routes/coverRouter'))
-app.use('/api/post', require('./routes/postRouter'))
-
-
+const app = express();
+app.use(express.json());
+app.use(cors());
+app.use(cookieParser());
+app.use("/api/user", require("./routes/userRouter"));
+app.use("/api/upload", require("./routes/uploadRouter"));
+app.use("/api/avatar", require("./routes/avatarRouter"));
+app.use("/api/cover", require("./routes/coverRouter"));
+app.use("/api/post", require("./routes/postRouter"));
+app.use("/api/comment", require("./routes/commentRouter"));
 
 // Routes
 
+const URI = process.env.MONGODB_URL;
 
-const URI = process.env.MONGODB_URL
-
-mongoose.connect(URI, {
+mongoose.connect(
+  URI,
+  {
     useNewUrlParser: true,
-    useUnifiedTopology: true
-}, err => {
-    if(err) throw err
-    console.log('Connected to mongodb')
-})
+    useUnifiedTopology: true,
+  },
+  (err) => {
+    if (err) throw err;
+    console.log("Connected to mongodb");
+  }
+);
 
-
-const port = process.env.PORT || 2000
+const port = process.env.PORT || 2000;
 app.listen(port, () => {
-    console.log('Server is running on port', port)
-})
+  console.log("Server is running on port", port);
+});

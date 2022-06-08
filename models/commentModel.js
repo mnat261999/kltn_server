@@ -1,45 +1,55 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const commentSchema = mongoose.Schema({
+const commentSchema = mongoose.Schema(
+  {
     content: {
-        type: String,
-        required: true,
-        maxlength: 1000
+      type: String,
+      required: true,
+      maxlength: 1000,
     },
-    responds: [{
+    tag: Object,
+    responds: [
+      {
         content: {
-            type: String,
-            required: true,
-            maxlength: 1000
+          type: String,
+          required: true,
+          maxlength: 1000,
         },
-        likes: [{
-            type: mongoose.Schema.Types.ObjectId, 
-            ref: 'user'
-        }],
+        likes: [
+          {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "user",
+          },
+        ],
         postedBy: {
-            type: mongoose.Schema.Types.ObjectId, 
-            ref: 'user'
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "user",
         },
         hiden: {
-            required: true,
-            default: false,
-            type: Boolean
+          required: true,
+          default: false,
+          type: Boolean,
         },
-    }],
-    likes: [{
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'user'
-    }],
+      },
+    ],
+    likes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "user",
+      },
+    ],
     postedBy: {
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'user'
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
     },
     hiden: {
-        required: true,
-        default: false,
-        type: Boolean
+      required: true,
+      default: false,
+      type: Boolean,
     },
-}, { timestamps: true });
+  },
+  { timestamps: true }
+);
 
-module.exports = mongoose.model('comment', commentSchema)
+module.exports = mongoose.model("comment", commentSchema);
