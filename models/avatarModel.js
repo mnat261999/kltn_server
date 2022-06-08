@@ -9,6 +9,10 @@ const avatarSchema = new mongoose.Schema({
     avatar:{
         type: Object,
         required: true   
+    },
+    desciption:{
+        type: String,
+        default:''
     }
 }, {
     timestamps: true

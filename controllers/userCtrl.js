@@ -184,13 +184,13 @@ const userCtrl = {
             const userBlock = await Users.findById(req.params.id)
 
             if (user.blockedUsers.some(id => id == req.params.id) == true) {
-                return res.status(400).json({ success: false})
-            } else if(userBlock.blockedUsers.some(id => id == req.user.id) == true) {
-                return res.status(400).json({ success: false})
+                return res.status(400).json({ success: false })
+            } else if (userBlock.blockedUsers.some(id => id == req.user.id) == true) {
+                return res.status(400).json({ success: false })
             } else {
                 Users.findOneAndUpdate(
                     { "_id": req.user.id },
-                    { $pull: { followings: req.params.id, followers: req.params.id }, $push: { blockedUsers: req.params.id }},
+                    { $pull: { followings: req.params.id, followers: req.params.id }, $push: { blockedUsers: req.params.id } },
                     { new: true },
                     (err, user) => {
                         if (err) return res.status(400).json({ success: false });
@@ -201,7 +201,7 @@ const userCtrl = {
                                 if (err) return res.status(400).json({ success: false });
                                 return res.status(200).json({ success: true, userId: req.params.id })
                             })
-                })
+                    })
             }
         } catch (err) {
             return res.status(500).json({ msg: err.message })
@@ -236,7 +236,7 @@ const userCtrl = {
                 .exec((err, users) => {
                     console.log(err)
                     if (err) return res.status(400).send(err);
-                    return res.status(200).json({users});
+                    return res.status(200).json({ users });
                 })
         } catch (err) {
             return res.status(500).json({ msg: err.message })
@@ -258,16 +258,18 @@ const userCtrl = {
             const blockList = blockedUsers.concat(blockedBy)
 
             const users = await Users.find(
-                { $or:[
-                    {username:{$regex:  matchRegex, $options: 'i' }},
-                    {fullname:{$regex:  matchRegex, $options: 'i' }}
-                ],
-                _id: { $nin: blockList } }
-                )
+                {
+                    $or: [
+                        { username: { $regex: matchRegex, $options: 'i' } },
+                        { fullname: { $regex: matchRegex, $options: 'i' } }
+                    ],
+                    _id: { $nin: blockList }
+                }
+            )
                 .skip(skip)
-                                    
+
                 .limit(limit)
-                                    
+
                 .select("_id avatar fullname username")
 
             return res.status(200).json({ users })
@@ -286,81 +288,104 @@ const userCtrl = {
             const blockList = blockedUsers.concat(blockedBy)
 
             const userInfor = await Users.find({
-                $and:[
-                    {_id: req.params.id},
-                    {_id: {$nin: blockList}}
+                $and: [
+                    { _id: req.params.id },
+                    { _id: { $nin: blockList } }
                 ]
             })
-            .select('-password -request -blockedBy')
-                                         
+                .select('-password -request -blockedBy')
+
             return res.status(200).json({ userInfor })
-            
+
         } catch (err) {
             return res.status(500).json({ msg: err.message })
         }
     },
-    getUserLogin: async (req, res) =>{
+    getUserLogin: async (req, res) => {
         try {
             const user = await Users.findById(req.user.id).select('-blockedBy')
-                                         
+
             return res.status(200).json({ user })
-            
+
         } catch (err) {
             return res.status(500).json({ msg: err.message })
         }
     },
-    updateUser: async(req, res) => {
+    updateUser: async (req, res) => {
         try {
-            const {avatar, fullname, mobile, address, story, website, gender} = req.body
-            if(!fullname) 
-                return res.status(500).json({ msg: err.message })
-            await Users.findOneAndUpdate({_id: req.user._id}, {
-                avatar, fullname, mobile, address, story, website, gender   
+            const { fullname, username, email, gender, dob, website } = req.body
+            if (!fullname || !username || !email || !dob || !gender)
+                return res.status(400).json({ msg: "Please fill in all fields." })
+
+            const format_dob = Date(dob)
+
+            await Users.findOneAndUpdate({ _id: req.user.id }, {
+                fullname, username, email, gender, dob: format_dob, address, website
             })
 
-            res.json({msg: "Update Success!"})
+            return res.status(200).json({ msg: "Update Success!" })
         } catch (err) {
             return res.status(500).json({ msg: err.message })
         }
-    }, 
-    follow: async(req, res) => {
+    },
+    askFollow: async (req, res) => {
         try {
-            const user = await Users.find({_id: req.params.id, followers: req.user._id}) 
-            if(user.length > 0) 
-                return res.status(500).json({ msg: "You followed this user." })
-            
-            await Users.findByIdAndUpdate({_id: req.params.id}, {
-                $push: {followers: req.user._id} 
-            }, {new: true})
+            const ask = await Users.findByIdAndUpdate(req.params.followId, {
+                $addToSet: { request: req.user.id }
+            }, {
+                new: true
+            }).populate("followers", "_id username avatar")
+                .populate("following", "_id username avatar")
 
-            await Users.findByIdAndUpdate({_id: req.params.id}, {
-                $push: {followings: req.user._id} 
-            }, {new: true})
-            
-            res.json({msg: 'Followed User.'})
+            return res.status(200).json({
+                success: true,
+                ask
+            })
+
         } catch (err) {
             return res.status(500).json({ msg: err.message })
         }
-    }, 
-    unfollow: async(req, res) => {
+    },
+    declineFollow: async (req, res) => {
         try {
-            const user = await Users.find({_id: req.params.id, followers: req.user._id}) 
-            if(user.length > 0) 
-                return res.status(500).json({ msg: "You followed this user." })
-            
-            await Users.findByIdAndUpdate({_id: req.params.id}, {
-                $push: {followers: req.user._id} 
-            }, {new: true})
+            await Users.findByIdAndUpdate(req.user.id, {
+                $pull: { request: req.params.id }
+            })
 
-            await Users.findByIdAndUpdate({_id: req.params.id}, {
-                $push: {followings: req.user._id} 
-            }, {new: true})
-            
-            res.json({msg: 'Unfollow User.'})
+            return res.status(200).json({
+                success: true
+            })
         } catch (err) {
             return res.status(500).json({ msg: err.message })
         }
-    }, 
+    },
+    acceptFollow: async (req, res) => {
+        try {
+            Users.findByIdAndUpdate(req.params.id, {
+                $addToSet: { following: req.user.id }
+            }).exec((err, result) => {
+                if (err) {
+                    return res.status(400).json({ success: false })
+                }
+            })
+
+            Users.findByIdAndUpdate(req.user.id, {
+                $addToSet: { followers: req.params.id },
+                $pull: { request: req.params.id }
+            }).exec((err, result) => {
+                if (err) {
+                    return res.status(400).json({ success: false })
+                }
+                else {
+                    return res.status(200).json({
+                        success: true
+                    })
+                }
+            })
+        } catch (err) {
+            return res.status(500).json({ msg: err.message })
+        }
+    }
 }
 
 function validateEmail(email) {
