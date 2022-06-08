@@ -308,7 +308,59 @@ const userCtrl = {
         } catch (err) {
             return res.status(500).json({ msg: err.message })
         }
-    }
+    },
+    updateUser: async(req, res) => {
+        try {
+            const {avatar, fullname, mobile, address, story, website, gender} = req.body
+            if(!fullname) 
+                return res.status(500).json({ msg: err.message })
+            await Users.findOneAndUpdate({_id: req.user._id}, {
+                avatar, fullname, mobile, address, story, website, gender   
+            })
+
+            res.json({msg: "Update Success!"})
+        } catch (err) {
+            return res.status(500).json({ msg: err.message })
+        }
+    }, 
+    follow: async(req, res) => {
+        try {
+            const user = await Users.find({_id: req.params.id, followers: req.user._id}) 
+            if(user.length > 0) 
+                return res.status(500).json({ msg: "You followed this user." })
+            
+            await Users.findByIdAndUpdate({_id: req.params.id}, {
+                $push: {followers: req.user._id} 
+            }, {new: true})
+
+            await Users.findByIdAndUpdate({_id: req.params.id}, {
+                $push: {followings: req.user._id} 
+            }, {new: true})
+            
+            res.json({msg: 'Followed User.'})
+        } catch (err) {
+            return res.status(500).json({ msg: err.message })
+        }
+    }, 
+    unfollow: async(req, res) => {
+        try {
+            const user = await Users.find({_id: req.params.id, followers: req.user._id}) 
+            if(user.length > 0) 
+                return res.status(500).json({ msg: "You followed this user." })
+            
+            await Users.findByIdAndUpdate({_id: req.params.id}, {
+                $push: {followers: req.user._id} 
+            }, {new: true})
+
+            await Users.findByIdAndUpdate({_id: req.params.id}, {
+                $push: {followings: req.user._id} 
+            }, {new: true})
+            
+            res.json({msg: 'Unfollow User.'})
+        } catch (err) {
+            return res.status(500).json({ msg: err.message })
+        }
+    }, 
 }
 
 function validateEmail(email) {

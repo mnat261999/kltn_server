@@ -18,5 +18,8 @@ router.get('/list/block', auth, userCtrl.getListBlockByUser)
 router.get('/search_user', auth, userCtrl.searchUser)
 router.get('/infor/:id', auth, userCtrl.getUserInfor)
 router.get('/login', auth, userCtrl.getUserLogin)
+router.patch('/', auth, userCtrl.updateUser)
+router.patch('/:id/follow', auth, userCtrl.follow)
+router.patch('/:id/unfollow', auth, userCtrl.unfollow)
 
 module.exports = router
