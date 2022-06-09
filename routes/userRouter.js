@@ -21,7 +21,7 @@ router.get('/login', auth, userCtrl.getUserLogin)
 router.patch('/update', auth, userCtrl.updateUser)
 router.put('/askfollow/:followId', auth, userCtrl.askFollow )
 router.put('/declinefollow/:id', auth, userCtrl.declineFollow )
-router.put('/acceptfollow/:id', auth, userCtrl.declineFollow )
+router.put('/acceptfollow/:id', auth, userCtrl.acceptFollow )
 
 
 module.exports = router

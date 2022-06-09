@@ -2,10 +2,6 @@ const mongoose = require("mongoose");
 
 const postSchema = mongoose.Schema(
   {
-    images: {
-      type: Array,
-      default: [],
-    },
     content: {
       type: String,
       maxlength: 1000,
@@ -14,12 +10,6 @@ const postSchema = mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "user",
-      },
-    ],
-    comments: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "comment",
       },
     ],
     likes: [

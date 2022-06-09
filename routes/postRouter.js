@@ -2,12 +2,8 @@ const router = require("express").Router();
 const postCtrl = require("../controllers/postCtrl");
 const auth = require("../middleware/auth");
 
-router
-  .route("/posts")
-  .post(auth, postCtrl.createPost)
-  .get(auth, postCtrl.getPosts);
+router.post('/create', auth, postCtrl.createPost)
+router.get('/getall', auth, postCtrl.getPosts)
+router.put('/update/:id', auth, postCtrl.updatePost)
 
-router.route("/posts/:id").patch(auth, postCtrl.updatePost);
-router.route("/posts/:id/like").patch(auth, postCtrl.likePost);
-router.route("/posts/:id/unlike").patch(auth, postCtrl.unLikePost);
 module.exports = router;

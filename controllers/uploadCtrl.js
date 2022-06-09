@@ -72,6 +72,43 @@ const uploadCtrl = {
         } catch (err) {
             return res.status(500).json({msg: err.message})
         }
+    },
+    uploadMediaPost: async (req, res) => {
+        try {
+            const files = req.files; 
+
+            if(files.some( f => f.mimetype != 'video/mp4' && f.mimetype != 'image/jpeg' && f.mimetype != 'image/png') ){
+                return res.status(400).json({msg: "File format is incorrect."})
+            }
+
+            const medias = []
+
+            for(var i = 0; i<files.length;i++){
+                const params = {
+                    Bucket: `${process.env.AWS_PUBLIC_BUCKET_NAME}/media`,
+                    Key: `${uuidv4()}${files[i].originalname}`,
+                    Body: `${uuidv4()}-${files[i].originalname}`,
+                    ACL:'public-read-write'
+                };
+
+                const uploadResult = await s3.upload(params).promise();
+
+                const media = {
+                    media:{
+                        key: uploadResult.Key,
+                        url: uploadResult.Location
+                    },
+                    typeMedia: files[i].mimetype
+                }
+
+                medias.push(media)
+            }
+
+            res.json({media:medias})
+        
+        } catch (err) {
+            return res.status(500).json({msg: err.message})
+        }
     }
 }
 
