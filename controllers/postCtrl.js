@@ -62,6 +62,14 @@ const postCtrl = {
                 },
                 {
                     "$lookup": {
+                      "from": "comments",
+                      "localField": "_id",
+                      "foreignField": "postId",
+                      "as": "comments"
+                    }
+                },
+                {
+                    "$lookup": {
                       "from": "users",
                       "localField": "postedBy",
                       "foreignField": "_id",
@@ -153,17 +161,21 @@ const postCtrl = {
         try {
             const post = await Posts.find({
                 _id: req.params.id,
-                likes: req.user._id,
+                likes: req.user.id,
             });
-            if (post) return res.status(400).json({ msg: "You liked this post." });
+
+            
+            if (post.length != 0) return res.status(400).json({ msg: "You liked this post." });
 
             await Posts.findOneAndUpdate(
                 { _id: req.params.id },
                 {
-                    $push: { likes: req.user._id },
+                    $push: { likes: req.user.id },
                 },
                 { new: true }
             );
+
+            return res.status(200).json({ success: true})
         } catch (error) {
             return res.status(500).json({ msg: err.message });
         }
@@ -171,12 +183,14 @@ const postCtrl = {
     unLikePost: async (req, res) => {
         try {
             await Posts.findOneAndUpdate(
-                { _id: req.params._id },
+                { _id: req.params.id },
                 {
-                    $pull: { likes: req.user._id },
+                    $pull: { likes: req.user.id },
                 },
                 { new: true }
             );
+
+            return res.status(200).json({ success: true})
         } catch (error) {
             return res.status(500).json({ msg: err.message });
         }

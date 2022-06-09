@@ -5,26 +5,33 @@ const commentSchema = mongoose.Schema(
   {
     content: {
       type: String,
-      required: true,
       maxlength: 1000,
     },
-    tag: Object,
-    responds: [
+    tag: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "user",
+      }
+    ],
+    reply: [
       {
         content: {
           type: String,
-          required: true,
           maxlength: 1000,
         },
         likes: [
           {
             type: mongoose.Schema.Types.ObjectId,
             ref: "user",
-          },
+          }
         ],
         postedBy: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "user",
+        },
+        postId:{
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "post",
         },
         hiden: {
           required: true,
@@ -37,11 +44,15 @@ const commentSchema = mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "user",
-      },
+      }
     ],
     postedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
+    },
+    postId:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "post",
     },
     hiden: {
       required: true,
