@@ -9,5 +9,6 @@ router.patch('/like/:id', auth, postCtrl.likePost)
 router.patch('/unlike/:id', auth, postCtrl.unLikePost)
 router.get('/byuserlogin', auth, postCtrl.getPotsByUserLogin)
 router.get('/byuserid/:id', auth, postCtrl.getPostByUserId)
+router.delete('/delete/:id', auth, postCtrl.deletePost)
 
 module.exports = router;

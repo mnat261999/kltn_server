@@ -1,6 +1,7 @@
 const Posts = require("../models/postModel");
 const Medias = require("../models/mediaModel")
 const Users = require('../models/userModel')
+const Comments = require("../models/commentModel");
 const { mongoose } = require("mongoose");
 
 const postCtrl = {
@@ -354,6 +355,25 @@ const postCtrl = {
 				success: true,
 				total: posts.length,
 				data:posts
+			})
+		} catch (err) {
+			return res.status(500).json({ msg: err.message });
+		}
+	},
+	deletePost: async (req, res) =>{
+		try {
+
+			const post = await Posts.findById(req.params.id)
+			
+			if(post.postedBy.toString() != req.user.id) 
+				return res.status(400).json({success: false,  msg: "You cannot delete post" }) 
+
+			await Posts.findByIdAndDelete(req.params.id)
+
+			await Comments.deleteMany({postId: mongoose.Types.ObjectId(req.params.id)})
+
+			return res.status(200).json({ 
+				success: true
 			})
 		} catch (err) {
 			return res.status(500).json({ msg: err.message });
