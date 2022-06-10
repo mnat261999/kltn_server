@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const sendMail = require('../utils/sendMail')
 const algoliasearch = require('algoliasearch')
+const { mongoose } = require("mongoose");
+
 
 
 const { CLIENT_URL } = process.env
@@ -415,6 +417,65 @@ const userCtrl = {
                         success: true
                     })
                 }
+            })
+        } catch (err) {
+            return res.status(500).json({ msg: err.message })
+        }
+    },
+    suggestionUser: async (req, res) => {
+        try {
+            const user = await Users.findById(req.user.id)
+
+            const num = req.query.num || 10
+
+            const users = await Users.aggregate([
+                {
+					"$match": {
+						"$and": [
+							{
+								"_id": {
+									"$nin": [...user.following, mongoose.Types.ObjectId(req.user.id)]
+								}
+							},
+							{
+								"_id": {
+									"$nin": user.blockedUsers
+								}
+							},
+							{
+								"_id": {
+									"$nin": user.blockedBy
+								}
+							}
+						]
+					}
+				},
+                {
+                    "$sample":{
+                        "size" : Number(num)
+                    }
+                },
+                {
+                    "$lookup":{
+                        "from": "users",
+						"localField": "followers",
+						"foreignField": "_id",
+						"as": "followers"
+                    }
+                },
+                {
+                    "$lookup":{
+                        "from": "users",
+						"localField": "following",
+						"foreignField": "_id",
+						"as": "following"
+                    }
+                }
+            ]).project("-password -request -blockedBy -blockedUsers -role")
+
+            return res.status(200).json({
+                success: true,
+                data:users
             })
         } catch (err) {
             return res.status(500).json({ msg: err.message })
