@@ -24,4 +24,5 @@ router.put('/declinefollow/:id', auth, userCtrl.declineFollow )
 router.put('/acceptfollow/:id', auth, userCtrl.acceptFollow )
 
 
+
 module.exports = router

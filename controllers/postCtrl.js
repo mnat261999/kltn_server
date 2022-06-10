@@ -150,6 +150,24 @@ const postCtrl = {
 						],
 						"as": "userInfor"
 					}
+				},
+				{
+					"$lookup": {
+						"from": "users",
+						"localField": "likes",
+						"foreignField": "_id",
+						"pipeline": [
+							{
+								"$project": {
+									"_id": 1,
+									"fullname": 1,
+									"username": 1,
+									"avatar": 1
+								}
+							}
+						],
+						"as": "userLikes"
+					}
 				}
 			])
 
@@ -235,10 +253,112 @@ const postCtrl = {
 			);
 
 			return res.status(200).json({ success: true })
-		} catch (error) {
+		} catch (err) {
 			return res.status(500).json({ msg: err.message });
 		}
 	},
+	getPotsByUserLogin: async (req, res) =>{
+		try {
+			const posts = await Posts.aggregate([
+				{
+					"$match": {
+						"$and": [
+							{
+								"postedBy": {
+									"$in": [mongoose.Types.ObjectId(req.user.id)]
+								}
+							}
+						]
+					}
+				},
+				{
+					"$lookup": {
+						"from": "media",
+						"localField": "_id",
+						"foreignField": "post",
+						"as": "medias"
+					}
+				},
+				{
+					"$lookup": {
+						"from": "users",
+						"localField": "likes",
+						"foreignField": "_id",
+						"pipeline": [
+							{
+								"$project": {
+									"_id": 1,
+									"fullname": 1,
+									"username": 1,
+									"avatar": 1
+								}
+							}
+						],
+						"as": "userLikes"
+					}
+				}
+			])
+
+			return res.status(200).json({ 
+				success: true,
+				total: posts.length,
+				data:posts
+			})
+		} catch (err) {
+			return res.status(500).json({ msg: err.message });
+		}
+	},
+	getPostByUserId: async (req, res) => {
+		try {
+			const posts = await Posts.aggregate([
+				{
+					"$match": {
+						"$and": [
+							{
+								"postedBy": {
+									"$in": [mongoose.Types.ObjectId(req.params.id)]
+								}
+							}
+						]
+					}
+				},
+				{
+					"$lookup": {
+						"from": "media",
+						"localField": "_id",
+						"foreignField": "post",
+						"as": "medias"
+					}
+				},
+				{
+					"$lookup": {
+						"from": "users",
+						"localField": "likes",
+						"foreignField": "_id",
+						"pipeline": [
+							{
+								"$project": {
+									"_id": 1,
+									"fullname": 1,
+									"username": 1,
+									"avatar": 1
+								}
+							}
+						],
+						"as": "userLikes"
+					}
+				}
+			])
+
+			return res.status(200).json({ 
+				success: true,
+				total: posts.length,
+				data:posts
+			})
+		} catch (err) {
+			return res.status(500).json({ msg: err.message });
+		}
+	}
 };
 
 const addMedia = async (idPost, media, typeMedia) => {
