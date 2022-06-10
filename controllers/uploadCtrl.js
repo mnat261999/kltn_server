@@ -13,7 +13,7 @@ const uploadCtrl = {
         try {
             const files = req.files; 
             if(files[0].mimetype !== 'image/jpeg' && files[0].mimetype !== 'image/png'){
-                return res.status(400).json({msg: "File format is incorrect."})
+                return res.status(400).json({success: false, msg: "File format is incorrect."})
             }
             const avatars = []
 
@@ -35,7 +35,10 @@ const uploadCtrl = {
                 avatars.push(avatar)
             }
 
-            res.json({avatar:avatars[0]})
+            res.status(200).json({ 
+                success:true,
+                data:avatars[0]
+            })
         
         } catch (err) {
             return res.status(500).json({msg: err.message})
@@ -45,7 +48,7 @@ const uploadCtrl = {
         try {
             const files = req.files; 
             if(files[0].mimetype !== 'image/jpeg' && files[0].mimetype !== 'image/png'){
-                return res.status(400).json({msg: "File format is incorrect."})
+                return res.status(400).json({success: false, msg: "File format is incorrect."})
             }
             const covers = []
 
@@ -67,7 +70,10 @@ const uploadCtrl = {
                 covers.push(cover)
             }
 
-            res.json({cover:covers[0]})
+            res.status(200).json({ 
+                success:true,
+                data:covers[0]
+            })
         
         } catch (err) {
             return res.status(500).json({msg: err.message})
@@ -78,7 +84,7 @@ const uploadCtrl = {
             const files = req.files; 
 
             if(files.some( f => f.mimetype != 'video/mp4' && f.mimetype != 'image/jpeg' && f.mimetype != 'image/png') ){
-                return res.status(400).json({msg: "File format is incorrect."})
+                return res.status(400).json({success: false, msg: "File format is incorrect."})
             }
 
             const medias = []
@@ -104,7 +110,10 @@ const uploadCtrl = {
                 medias.push(media)
             }
 
-            res.json({media:medias})
+            res.status(200).json({ 
+                success:true,
+                data:medias
+            })
         
         } catch (err) {
             return res.status(500).json({msg: err.message})

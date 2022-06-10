@@ -9,7 +9,7 @@ const commentCtrl = {
 			let { postId, content, tag } = req.body;
 
 			if (!content && !tag) {
-				return res.status(400).json({ msg: "You cannot submit comment empty" })
+				return res.status(400).json({success: false,  msg: "You cannot submit comment empty" })
 			}
 
 			if (!content) { content = '' }
@@ -35,7 +35,7 @@ const commentCtrl = {
 
 			res.status(200).json({
 				success: true,
-				newComment
+				data:newComment
 			});
 		} catch (err) {
 			return res.status(500).json({ msg: err.message });
@@ -45,12 +45,12 @@ const commentCtrl = {
 		try {
 			const comment = await Comments.findById(req.params.id)
 
-			if (comment.postedBy != req.user.id) return res.status(400).json({ msg: "You cannot udate comment" })
+			if (comment.postedBy != req.user.id) return res.status(400).json({success: false, msg: "You cannot udate comment" })
 
 			let { content, tag } = req.body;
 
 			if (!content && !tag) {
-				return res.status(400).json({ msg: "You cannot submit comment empty" })
+				return res.status(400).json({success: false, msg: "You cannot submit comment empty" })
 			}
 
 			if (!content) { content = '' }
@@ -65,7 +65,7 @@ const commentCtrl = {
 				{ content, tag }
 			);
 
-			if (!cm) return res.status(400).json({ msg: "Wrong!" });
+			if (!cm) return res.status(400).json({success: false, msg: "Wrong!" });
 			res.status(200).json({
 				success: true,
 				msg: "Update success"
@@ -84,9 +84,33 @@ const commentCtrl = {
 
 			const comments = await Comments.aggregate([
 				{
+					"$match": {
+						"$and": [
+							{
+								"postId": mongoose.Types.ObjectId(req.params.idPost)
+							},
+							{
+								"postedBy": {
+									"$in": [...user.following, mongoose.Types.ObjectId(req.user.id)]
+								}
+							},
+							{
+								"postedBy": {
+									"$nin": user.blockedUsers
+								}
+							},
+							{
+								"postedBy": {
+									"$nin": user.blockedBy
+								}
+							}
+						]
+					}
+				},
+				{
 					"$lookup": {
-						"from": "users",
 						"localField": "postedBy",
+						"from": "users",
 						"foreignField": "_id",
 						"pipeline": [
 							{
@@ -122,30 +146,6 @@ const commentCtrl = {
 						],
 						"as": "userInfor"
 					}
-				},
-				{
-					"$match": {
-						"$and": [
-							{
-								"postId": mongoose.Types.ObjectId(req.params.idPost)
-							},
-							{
-								"postedBy": {
-									"$in": [...user.following, mongoose.Types.ObjectId(req.user.id)]
-								}
-							},
-							{
-								"postedBy": {
-									"$nin": user.blockedUsers
-								}
-							},
-							{
-								"postedBy": {
-									"$nin": user.blockedBy
-								}
-							}
-						]
-					}
 				}
 			])
 
@@ -153,8 +153,8 @@ const commentCtrl = {
 
 			res.status(200).json({
 				success: true,
-				allComment: commentAll.length,
-				comments,
+				total: commentAll.length,
+				data:comments,
 			});
 		} catch (err) {
 			return res.status(500).json({ msg: err.message });
@@ -198,12 +198,26 @@ const commentCtrl = {
 			return res.status(500).json({ msg: err.message });
 		}
 	},
+	deleteComment: async (req, res) => {
+		try {
+			await Comments.findOneAndDelete({
+                _id: req.params.id,
+                $or: [
+                    {postedBy: req.user.id}
+                ]
+            })
+
+			return res.status(200).json({ success: true })
+		} catch (err) {
+			return res.status(500).json({ msg: err.message });
+		}
+	},
 	replyComment: async (req, res) => {
 		try {
 			let { commentId, content, tag } = req.body;
 
 			if (!content && !tag) {
-				return res.status(400).json({ msg: "You cannot submit comment empty" })
+				return res.status(400).json({success: false, msg: "You cannot submit comment empty" })
 			}
 
 			if (!content) { content = '' }
@@ -238,7 +252,7 @@ const commentCtrl = {
 			let { commentId, content, tag } = req.body;
 
 			if (!content && !tag) {
-				return res.status(400).json({ msg: "You cannot submit comment empty" })
+				return res.status(400).json({success: false, msg: "You cannot submit comment empty" })
 			}
 
 			if (!content) { content = '' }
@@ -275,6 +289,17 @@ const commentCtrl = {
 			})
 
 		
+		} catch (err) {
+			return res.status(500).json({ msg: err.message });
+		}
+	},
+	deleteReply: async (req, res) =>{
+		try {
+			await Comments.deleteOne(
+				{ _id: mongoose.Types.ObjectId(req.params.idComment), "reply._id": mongoose.Types.ObjectId(req.params.idReply), "reply.postedBy": mongoose.Types.ObjectId(req.user.id) }
+            )
+
+			return res.status(200).json({ success: true })
 		} catch (err) {
 			return res.status(500).json({ msg: err.message });
 		}

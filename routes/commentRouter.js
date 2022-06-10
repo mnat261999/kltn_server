@@ -16,5 +16,8 @@ router.patch('/reply', auth, commentCtrl.replyComment)
 
 router.patch('/replyupdate/:id', auth, commentCtrl.updateReply)
 
+router.delete('/delete/:id', auth, commentCtrl.deleteComment)
+
+router.delete('/replydelete/:idComment/:idReply', auth, commentCtrl.deleteComment)
 
 module.exports = router;

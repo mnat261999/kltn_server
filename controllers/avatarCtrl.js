@@ -8,7 +8,7 @@ const avatarCtrl = {
     updateAvatar: async (req, res) => {
         const {avatar} = req.body
 
-        if(!avatar) return res.status(400).json({msg: "No avatar upload"})
+        if(!avatar) return res.status(400).json({success: false, msg: "No avatar upload"})
 
         const newAvatar = new Avatars({
             avatar, user:req.user.id
@@ -29,12 +29,18 @@ const avatarCtrl = {
             objectID: req.user.id
         })
 
-        res.json({msg: "Avatar is uploaded"})
+        res.status(200).json({ 
+            success:true,
+            msg: "Avatar is uploaded"
+        })
     },
     getAllAvatarByUser: async (req, res) =>{
         const avatars = await Avatars.find({user:req.user.id})
 
-        res.json({listAvatar:avatars})
+        res.status(200).json({ 
+            success:true,
+            data:avatars
+        })
     }
 }
 

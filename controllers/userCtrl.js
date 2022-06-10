@@ -18,17 +18,17 @@ const userCtrl = {
             const { fullname, username, email, password, dob, gender } = req.body
 
             if (!fullname || !username || !email || !password || !dob || !gender)
-                return res.status(400).json({ msg: "Please fill in all fields." })
+                return res.status(400).json({ success: false, msg: "Please fill in all fields." })
 
             if (!validateEmail(email))
-                return res.status(400).json({ msg: "Invalid emails." })
+                return res.status(400).json({ success: false, msg: "Invalid emails." })
 
             const user = await Users.findOne({ email })
 
-            if (user) return res.status(400).json({ msg: "This email already exists." })
+            if (user) return res.status(400).json({ success: false, msg: "This email already exists." })
 
             if (!validatePass(password))
-                return res.status(400).json({ msg: "Password must be at least 8 characters, one letter and one number." })
+                return res.status(400).json({success: false, msg: "Password must be at least 8 characters, one letter and one number." })
 
             const passwordHash = await bcrypt.hash(password, 12)
 
@@ -45,7 +45,8 @@ const userCtrl = {
 
             sendMail(email, url, "Verify your email address")
 
-            res.json({
+            res.status(200).json({
+                success:true,
                 msg: "Register Success! Please activate your email to start.",
                 activation_token: activation_token
             })
@@ -60,7 +61,7 @@ const userCtrl = {
 
             const { fullname, username, email, password, dob, gender } = user
             const check = await Users.findOne({ email })
-            if (check) return res.status(400).json({ msg: "This email already exists." })
+            if (check) return res.status(400).json({success: false, msg: "This email already exists." })
 
             const format_dob = Date(dob)
 
@@ -83,7 +84,10 @@ const userCtrl = {
 
             //console.log(userNew._id.toHexString())
 
-            res.json({ msg: "Account has been activated!" })
+            res.status(200).json({ 
+                success:true,
+                msg: "Account has been activated!" 
+            })
         } catch (err) {
             return res.status(500).json({ msg: err.message })
         }
@@ -92,10 +96,10 @@ const userCtrl = {
         try {
             const { email, password } = req.body
             const user = await Users.findOne({ email })
-            if (!user) return res.status(400).json({ msg: "This email does not exist." })
+            if (!user) return res.status(400).json({success: false, msg: "This email does not exist." })
 
             const isMatch = await bcrypt.compare(password, user.password)
-            if (!isMatch) return res.status(400).json({ msg: "Password is incorrect" })
+            if (!isMatch) return res.status(400).json({success: false, msg: "Password is incorrect" })
 
             const refresh_token = createRefreshToken({ id: user._id })
             const access_token = createAccessToken({ id: user._id })
@@ -107,7 +111,8 @@ const userCtrl = {
             })
 
             //console.log(user)
-            res.json({
+            res.status(200).json({ 
+                success:true,
                 msg: "Login success!",
                 access_token: access_token
             })
@@ -121,14 +126,17 @@ const userCtrl = {
 
             //console.log(req.cookies)
 
-            if (!rf_token) return res.status(400).json({ msg: 'Please login now!' })
+            if (!rf_token) return res.status(400).json({success: false, msg: 'Please login now!' })
 
             jwt.verify(rf_token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
-                if (err) { return res.status(400).json({ msg: 'Please login now!' }) }
+                if (err) { return res.status(400).json({success: false, msg: 'Please login now!' }) }
 
                 //console.log(user)
                 const access_token = createAccessToken({ id: user.id })
-                res.json({ access_token })
+                res.status(200).json({ 
+                    success:true, 
+                    access_token:access_token
+                })
             })
         } catch (err) {
             return res.status(500).json({ msg: err.message })
@@ -138,13 +146,14 @@ const userCtrl = {
         try {
             const { email } = req.body
             const user = await Users.findOne({ email })
-            if (!user) return res.status(400).json({ msg: "This email does not exist." })
+            if (!user) return res.status(400).json({success: false, msg: "This email does not exist." })
 
             const access_token = createAccessToken({ id: user._id })
             const url = `${CLIENT_URL}/user/reset/${access_token}`
 
             sendMail(email, url, "Reset your password")
-            res.json({
+            res.status(200).json({ 
+                success:true,
                 msg: "Re-send the password, please check your email.",
                 access_token: access_token
             })
@@ -164,7 +173,10 @@ const userCtrl = {
             })
 
             //console.log("Hash: " + password)
-            res.json({ msg: "Password successfully changed!" })
+            res.status(200).json({ 
+                success:true, 
+                msg: "Password successfully changed!" 
+            })
         } catch (err) {
             return res.status(500).json({ msg: err.message })
         }
@@ -172,7 +184,10 @@ const userCtrl = {
     logout: async (req, res) => {
         try {
             res.clearCookie('refreshtoken', { path: '/user/refresh_token' })
-            return res.json({ msg: "Logged out." })
+            return res.status(200).json({ 
+                success:true, 
+                msg: "Logged out." 
+            })
         } catch (err) {
             return res.status(500).json({ msg: err.message })
         }
@@ -231,12 +246,17 @@ const userCtrl = {
         try {
             const user = await Users.findById(req.user.id)
 
+            console.log(user)
+
             Users.find({ "_id": { $in: user.blockedUsers } })
                 .select('username _id avatar')
                 .exec((err, users) => {
                     console.log(err)
                     if (err) return res.status(400).send(err);
-                    return res.status(200).json({ users });
+                    return res.status(200).json({ 
+                        success:true, 
+                        data:users 
+                    });
                 })
         } catch (err) {
             return res.status(500).json({ msg: err.message })
@@ -272,7 +292,10 @@ const userCtrl = {
 
                 .select("_id avatar fullname username")
 
-            return res.status(200).json({ users })
+            return res.status(200).json({ 
+                success:true,
+                data:users 
+            })
         } catch (err) {
             return res.status(500).json({ msg: err.message })
         }
@@ -295,7 +318,10 @@ const userCtrl = {
             })
                 .select('-password -request -blockedBy')
 
-            return res.status(200).json({ userInfor })
+            return res.status(200).json({ 
+                success:true,
+                data:userInfor 
+            })
 
         } catch (err) {
             return res.status(500).json({ msg: err.message })
@@ -305,7 +331,10 @@ const userCtrl = {
         try {
             const user = await Users.findById(req.user.id).select('-blockedBy')
 
-            return res.status(200).json({ user })
+            return res.status(200).json({ 
+                success:true,
+                data:user 
+            })
 
         } catch (err) {
             return res.status(500).json({ msg: err.message })
@@ -315,7 +344,7 @@ const userCtrl = {
         try {
             const { fullname, username, email, gender, dob, website } = req.body
             if (!fullname || !username || !email || !dob || !gender)
-                return res.status(400).json({ msg: "Please fill in all fields." })
+                return res.status(400).json({success: false, msg: "Please fill in all fields." })
 
             const format_dob = Date(dob)
 
@@ -323,7 +352,10 @@ const userCtrl = {
                 fullname, username, email, gender, dob: format_dob, address, website
             })
 
-            return res.status(200).json({ msg: "Update Success!" })
+            return res.status(200).json({ 
+                success:true,
+                msg: "Update Success!" 
+            })
         } catch (err) {
             return res.status(500).json({ msg: err.message })
         }

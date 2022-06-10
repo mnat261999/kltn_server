@@ -4,248 +4,248 @@ const Users = require('../models/userModel')
 const { mongoose } = require("mongoose");
 
 const postCtrl = {
-    createPost: async (req, res) => {
-        try {
-            const { content, medias } = req.body;
+	createPost: async (req, res) => {
+		try {
+			const { content, medias } = req.body;
 
-            if(!content && !medias){
-                return res.status(400).json({ msg: "You cannot submit status empty" })
-            }else if(content && medias){
-                const newPost = new Posts({
-                    content:content, postedBy: req.user.id
-                })
+			if (!content && !medias) {
+				return res.status(400).json({success: false,  msg: "You cannot submit status empty" })
+			} else if (content && medias) {
+				const newPost = new Posts({
+					content: content, postedBy: req.user.id
+				})
 
-                const post = await newPost.save()
+				const post = await newPost.save()
 
-                for (const m of medias){
-                    await addMedia(post._id, m.media, m.typeMedia)
-                }
+				for (const m of medias) {
+					await addMedia(post._id, m.media, m.typeMedia)
+				}
 
-                return res.status(200).json({ success: true})
-            } else if (content && !medias){
-                const newPost = new Posts({
-                    content:content, postedBy: req.user.id
-                })
+				return res.status(200).json({ success: true })
+			} else if (content && !medias) {
+				const newPost = new Posts({
+					content: content, postedBy: req.user.id
+				})
 
-                await newPost.save()
+				await newPost.save()
 
-                return res.status(200).json({ success: true})
-            } else if (medias && !content){
-                const newPost = new Posts({
-                    content:'',postedBy: req.user.id
-                })
+				return res.status(200).json({ success: true })
+			} else if (medias && !content) {
+				const newPost = new Posts({
+					content: '', postedBy: req.user.id
+				})
 
-                const post = await newPost.save()
+				const post = await newPost.save()
 
-                for (const m of medias){
-                    await addMedia(post._id, m.media, m.typeMedia)
-                }
+				for (const m of medias) {
+					await addMedia(post._id, m.media, m.typeMedia)
+				}
 
-                return res.status(200).json({ success: true})
-            }
-        } catch (err) {
-            return res.status(500).json({ msg: err.message });
-        }
-    },
-    getPosts: async (req, res) => {
-        try {
-            const user = await Users.findById(req.user.id) 
+				return res.status(200).json({ success: true })
+			}
+		} catch (err) {
+			return res.status(500).json({ msg: err.message });
+		}
+	},
+	getPosts: async (req, res) => {
+		try {
+			const user = await Users.findById(req.user.id)
 
-            const allPosts = await Posts.aggregate([
-                {
-                  "$lookup": {
-                    "from": "media",
-                    "localField": "_id",
-                    "foreignField": "post",
-                    "as": "medias"
-                  }
-                },
-/*                 {
-                    "$lookup": {
-                      "from": "comments",
-                      "localField": "_id",
-                      "foreignField": "postId",
-                      "as": "comments"
-                    }
-                },{
-                    "$unwind": {
-                      "path": "$comments",
-                      "preserveNullAndEmptyArrays": true
-                    }
-                },{
-                    "$lookup": {
-                      "from": "users",
-                      "localField": "comments.postedBy",
-                      "foreignField": "_id",
-                      "pipeline" : [
-                        {
-                            "$project":{
-                              "_id": 1,
-                              "fullname": 1,
-                              "username": 1,
-                              "avatar": 1
-                          }
-                        }
-                    ],
-                      "as": "comments.postedBy",
-                    }
-                }, */
-                {
-                    "$lookup": {
-                      "from": "users",
-                      "localField": "postedBy",
-                      "foreignField": "_id",
-                      "pipeline" : [
-                          {
-                              "$project":{
-                                "_id": 1,
-                                "fullname": 1,
-                                "username": 1,
-                                "avatar": 1
-                            }
-                          },
-                          { 
-                              "$match": {
-                                  "$and":[
-                                    {
-                                        "_id": {
-                                          "$in": [...user.following,mongoose.Types.ObjectId(req.user.id)]
-                                        }
-                                      },
-                                      {
-                                        "_id": {
-                                          "$nin": user.blockedUsers
-                                        }
-                                      },
-                                      {
-                                        "_id": {
-                                          "$nin": user.blockedBy
-                                        }
-                                      }
-                                  ]
-                              }
-                              
-                        }
-                      ] ,
-                      "as": "userInfor"
-                    }
-                },
-                {
-                  "$match": {
-                    "$and": [
-                      {
-                        "postedBy": {
-                          "$in": [...user.following,mongoose.Types.ObjectId(req.user.id)]
-                        }
-                      },
-                      {
-                        "postedBy": {
-                          "$nin": user.blockedUsers
-                        }
-                      },
-                      {
-                        "postedBy": {
-                          "$nin": user.blockedBy
-                        }
-                      }
-                    ]
-                  }
-                }
-              ])
+			const allPosts = await Posts.aggregate([
+				{
+					"$match": {
+						"$and": [
+							{
+								"postedBy": {
+									"$in": [...user.following, mongoose.Types.ObjectId(req.user.id)]
+								}
+							},
+							{
+								"postedBy": {
+									"$nin": user.blockedUsers
+								}
+							},
+							{
+								"postedBy": {
+									"$nin": user.blockedBy
+								}
+							}
+						]
+					}
+				},
+				{
+					"$lookup": {
+						"from": "media",
+						"localField": "_id",
+						"foreignField": "post",
+						"as": "medias"
+					}
+				},
+				/*                 {
+									"$lookup": {
+									  "from": "comments",
+									  "localField": "_id",
+									  "foreignField": "postId",
+									  "as": "comments"
+									}
+								},{
+									"$unwind": {
+									  "path": "$comments",
+									  "preserveNullAndEmptyArrays": true
+									}
+								},{
+									"$lookup": {
+									  "from": "users",
+									  "localField": "comments.postedBy",
+									  "foreignField": "_id",
+									  "pipeline" : [
+										{
+											"$project":{
+											  "_id": 1,
+											  "fullname": 1,
+											  "username": 1,
+											  "avatar": 1
+										  }
+										}
+									],
+									  "as": "comments.postedBy",
+									}
+								}, */
+				{
+					"$lookup": {
+						"from": "users",
+						"localField": "postedBy",
+						"foreignField": "_id",
+						"pipeline": [
+							{
+								"$project": {
+									"_id": 1,
+									"fullname": 1,
+									"username": 1,
+									"avatar": 1
+								}
+							},
+							{
+								"$match": {
+									"$and": [
+										{
+											"_id": {
+												"$in": [...user.following, mongoose.Types.ObjectId(req.user.id)]
+											}
+										},
+										{
+											"_id": {
+												"$nin": user.blockedUsers
+											}
+										},
+										{
+											"_id": {
+												"$nin": user.blockedBy
+											}
+										}
+									]
+								}
 
-            res.status(200).json({
-                success:true,
-                result: allPosts.length,
-                allPosts,
-            });
-        } catch (err) {
-            return res.status(500).json({ msg: err.message });
-        }
-    },
-    updatePost: async (req, res) => {
-        try {
-            const { content, medias, mediaIdDeleteList } = req.body;
+							}
+						],
+						"as": "userInfor"
+					}
+				}
+			])
 
-            if(mediaIdDeleteList){
-                await Medias.deleteMany({'_id':{'$in':mediaIdDeleteList}})
-            }
+			res.status(200).json({
+				success: true,
+				total: allPosts.length,
+				data:allPosts,
+			});
+		} catch (err) {
+			return res.status(500).json({ msg: err.message });
+		}
+	},
+	updatePost: async (req, res) => {
+		try {
+			const { content, medias, mediaIdDeleteList } = req.body;
 
-            if(!content && !medias){
-                return res.status(400).json({ msg: "You cannot submit status empty" })
-            }else if(content && medias){
+			if (mediaIdDeleteList) {
+				await Medias.deleteMany({ '_id': { '$in': mediaIdDeleteList } })
+			}
 
-                await Posts.findOneAndUpdate({ _id: req.params.id },{content:content})
+			if (!content && !medias) {
+				return res.status(400).json({success: false,  msg: "You cannot submit status empty" })
+			} else if (content && medias) {
 
-                const post = await Posts.findById(req.params.id)
+				await Posts.findOneAndUpdate({ _id: req.params.id }, { content: content })
 
-                for (const m of medias){
-                    await addMedia(post._id, m.media, m.typeMedia)
-                }
+				const post = await Posts.findById(req.params.id)
 
-                return res.status(200).json({ success: true})
-            }else if (content && !medias){
-                await Posts.findOneAndUpdate({ _id: req.params.id },{content:content})
+				for (const m of medias) {
+					await addMedia(post._id, m.media, m.typeMedia)
+				}
 
-                return res.status(200).json({ success: true})
-            }else if(!content && medias){
-                const post = await Posts.findById(req.params.id)
+				return res.status(200).json({ success: true })
+			} else if (content && !medias) {
+				await Posts.findOneAndUpdate({ _id: req.params.id }, { content: content })
 
-                for (const m of medias){
-                    await addMedia(post._id, m.media, m.typeMedia)
-                }
+				return res.status(200).json({ success: true })
+			} else if (!content && medias) {
+				const post = await Posts.findById(req.params.id)
 
-                return res.status(200).json({ success: true})
-            }
+				for (const m of medias) {
+					await addMedia(post._id, m.media, m.typeMedia)
+				}
 
-        } catch (err) {
-            return res.status(500).json({ msg: err.message });
-        }
-    },
-    likePost: async (req, res) => {
-        try {
-            const post = await Posts.find({
-                _id: req.params.id,
-                likes: req.user.id,
-            });
+				return res.status(200).json({ success: true })
+			}
 
-            
-            if (post.length != 0) return res.status(400).json({ msg: "You liked this post." });
+		} catch (err) {
+			return res.status(500).json({ msg: err.message });
+		}
+	},
+	likePost: async (req, res) => {
+		try {
+			const post = await Posts.find({
+				_id: req.params.id,
+				likes: req.user.id,
+			});
 
-            await Posts.findOneAndUpdate(
-                { _id: req.params.id },
-                {
-                    $push: { likes: req.user.id },
-                },
-                { new: true }
-            );
 
-            return res.status(200).json({ success: true})
-        } catch (error) {
-            return res.status(500).json({ msg: err.message });
-        }
-    },
-    unLikePost: async (req, res) => {
-        try {
-            await Posts.findOneAndUpdate(
-                { _id: req.params.id },
-                {
-                    $pull: { likes: req.user.id },
-                },
-                { new: true }
-            );
+			if (post.length != 0) return res.status(400).json({success: false,  msg: "You liked this post." });
 
-            return res.status(200).json({ success: true})
-        } catch (error) {
-            return res.status(500).json({ msg: err.message });
-        }
-    },
+			await Posts.findOneAndUpdate(
+				{ _id: req.params.id },
+				{
+					$push: { likes: req.user.id },
+				},
+				{ new: true }
+			);
+
+			return res.status(200).json({ success: true })
+		} catch (error) {
+			return res.status(500).json({ msg: err.message });
+		}
+	},
+	unLikePost: async (req, res) => {
+		try {
+			await Posts.findOneAndUpdate(
+				{ _id: req.params.id },
+				{
+					$pull: { likes: req.user.id },
+				},
+				{ new: true }
+			);
+
+			return res.status(200).json({ success: true })
+		} catch (error) {
+			return res.status(500).json({ msg: err.message });
+		}
+	},
 };
 
-const addMedia = async (idPost, media, typeMedia) =>{
-    const newMedia = new Medias({
-        post:idPost, media:media, typeMedia:typeMedia
-    })
-     return await newMedia.save()
+const addMedia = async (idPost, media, typeMedia) => {
+	const newMedia = new Medias({
+		post: idPost, media: media, typeMedia: typeMedia
+	})
+	return await newMedia.save()
 }
 
 module.exports = postCtrl;
