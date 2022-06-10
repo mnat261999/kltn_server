@@ -28,11 +28,13 @@ const commentSchema = mongoose.Schema(
         postedBy: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "user",
-        },
-        postId:{
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "post",
-        },
+        },    
+        tag: [
+          {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "user",
+          }
+        ],
         hiden: {
           required: true,
           default: false,

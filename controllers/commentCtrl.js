@@ -1,5 +1,6 @@
 const Comments = require("../models/commentModel");
 const Users = require('../models/userModel')
+const Posts = require("../models/postModel");
 const { mongoose } = require("mongoose");
 
 const commentCtrl = {
@@ -83,45 +84,45 @@ const commentCtrl = {
 
 			const comments = await Comments.aggregate([
 				{
-                    "$lookup": {
-                      "from": "users",
-                      "localField": "postedBy",
-                      "foreignField": "_id",
-                      "pipeline" : [
-                          {
-                              "$project":{
-                                "_id": 1,
-                                "fullname": 1,
-                                "username": 1,
-                                "avatar": 1
-                            }
-                          },
-                          { 
-                              "$match": {
-                                  "$and":[
-                                    {
-                                        "_id": {
-                                          "$in": [...user.following,mongoose.Types.ObjectId(req.user.id)]
-                                        }
-                                      },
-                                      {
-                                        "_id": {
-                                          "$nin": user.blockedUsers
-                                        }
-                                      },
-                                      {
-                                        "_id": {
-                                          "$nin": user.blockedBy
-                                        }
-                                      }
-                                  ]
-                              }
-                              
-                        }
-                      ] ,
-                      "as": "userInfor"
-                    }
-                },
+					"$lookup": {
+						"from": "users",
+						"localField": "postedBy",
+						"foreignField": "_id",
+						"pipeline": [
+							{
+								"$project": {
+									"_id": 1,
+									"fullname": 1,
+									"username": 1,
+									"avatar": 1
+								}
+							},
+							{
+								"$match": {
+									"$and": [
+										{
+											"_id": {
+												"$in": [...user.following, mongoose.Types.ObjectId(req.user.id)]
+											}
+										},
+										{
+											"_id": {
+												"$nin": user.blockedUsers
+											}
+										},
+										{
+											"_id": {
+												"$nin": user.blockedBy
+											}
+										}
+									]
+								}
+
+							}
+						],
+						"as": "userInfor"
+					}
+				},
 				{
 					"$match": {
 						"$and": [
@@ -148,11 +149,132 @@ const commentCtrl = {
 				}
 			])
 
+			console.log(comments)
+
 			res.status(200).json({
-                success:true,
-                allComment: commentAll.length,
-                comments,
-            });
+				success: true,
+				allComment: commentAll.length,
+				comments,
+			});
+		} catch (err) {
+			return res.status(500).json({ msg: err.message });
+		}
+	},
+	likeComment: async (req, res) => {
+		try {
+			const comment = await Comments.find({
+				_id: req.params.id,
+				likes: req.user.id,
+			});
+
+
+			if (comment.length != 0) return res.status(400).json({ msg: "You liked this comment." });
+
+			await Comments.findOneAndUpdate(
+				{ _id: req.params.id },
+				{
+					$push: { likes: req.user.id },
+				},
+				{ new: true }
+			);
+
+			return res.status(200).json({ success: true })
+		} catch (err) {
+			return res.status(500).json({ msg: err.message });
+		}
+	},
+	unLikeComment: async (req, res) => {
+		try {
+			await Comments.findOneAndUpdate(
+				{ _id: req.params.id },
+				{
+					$pull: { likes: req.user.id },
+				},
+				{ new: true }
+			);
+
+			return res.status(200).json({ success: true })
+		} catch (error) {
+			return res.status(500).json({ msg: err.message });
+		}
+	},
+	replyComment: async (req, res) => {
+		try {
+			let { commentId, content, tag } = req.body;
+
+			if (!content && !tag) {
+				return res.status(400).json({ msg: "You cannot submit comment empty" })
+			}
+
+			if (!content) { content = '' }
+
+			if (!tag) { tag = [] }
+
+			const reply = {
+				content: content,
+				likes: [],
+				tag: tag,
+				postedBy: req.user.id,
+				hiden: false
+			};
+
+			const comment = await Comments.findById(commentId)
+
+			comment.reply.push(reply)
+
+			await comment.save({ validateBeforeSave: false });
+
+			res.status(200).json({
+				success: true
+			})
+
+
+		} catch (err) {
+			return res.status(500).json({ msg: err.message });
+		}
+	},
+	updateReply : async (req, res) =>{
+		try {
+			let { commentId, content, tag } = req.body;
+
+			if (!content && !tag) {
+				return res.status(400).json({ msg: "You cannot submit comment empty" })
+			}
+
+			if (!content) { content = '' }
+
+			if (!tag) { tag = [] }
+
+			const reply = {
+				content: content,
+				likes: [],
+				tag: tag,
+				postedBy: req.user.id,
+				hiden: false
+			};
+
+			const comment = await Comments.findById(commentId)
+
+			//console.log(comment.reply)
+
+			const isReply = comment.reply.find(
+				c => c._id.toString() == req.params.id
+			)
+
+			console.log(isReply)
+
+			if(isReply.postedBy != req.user.id) return res.status(400).json({ msg: "You cannot update reply" })
+
+			await Comments.updateOne(
+				{ _id: mongoose.Types.ObjectId(commentId), "reply._id": mongoose.Types.ObjectId(req.params.id) },
+				{ $set: { reply } }
+			 )
+
+			 res.status(200).json({
+				success: true
+			})
+
+		
 		} catch (err) {
 			return res.status(500).json({ msg: err.message });
 		}

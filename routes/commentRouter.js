@@ -8,4 +8,13 @@ router.patch("/update/:id", auth, commentCtrl.updateComment)
 
 router.get("/getbypost/:idPost", auth, commentCtrl.getCommentByPost)
 
+router.patch('/like/:id', auth, commentCtrl.likeComment)
+
+router.patch('/unlike/:id', auth, commentCtrl.unLikeComment)
+
+router.patch('/reply', auth, commentCtrl.replyComment)
+
+router.patch('/replyupdate/:id', auth, commentCtrl.updateReply)
+
+
 module.exports = router;
