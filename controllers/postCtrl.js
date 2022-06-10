@@ -60,14 +60,36 @@ const postCtrl = {
                     "as": "medias"
                   }
                 },
-                {
+/*                 {
                     "$lookup": {
                       "from": "comments",
                       "localField": "_id",
                       "foreignField": "postId",
                       "as": "comments"
                     }
-                },
+                },{
+                    "$unwind": {
+                      "path": "$comments",
+                      "preserveNullAndEmptyArrays": true
+                    }
+                },{
+                    "$lookup": {
+                      "from": "users",
+                      "localField": "comments.postedBy",
+                      "foreignField": "_id",
+                      "pipeline" : [
+                        {
+                            "$project":{
+                              "_id": 1,
+                              "fullname": 1,
+                              "username": 1,
+                              "avatar": 1
+                          }
+                        }
+                    ],
+                      "as": "comments.postedBy",
+                    }
+                }, */
                 {
                     "$lookup": {
                       "from": "users",
@@ -81,7 +103,29 @@ const postCtrl = {
                                 "username": 1,
                                 "avatar": 1
                             }
-                          }
+                          },
+                          { 
+                              "$match": {
+                                  "$and":[
+                                    {
+                                        "_id": {
+                                          "$in": [...user.following,mongoose.Types.ObjectId(req.user.id)]
+                                        }
+                                      },
+                                      {
+                                        "_id": {
+                                          "$nin": user.blockedUsers
+                                        }
+                                      },
+                                      {
+                                        "_id": {
+                                          "$nin": user.blockedBy
+                                        }
+                                      }
+                                  ]
+                              }
+                              
+                        }
                       ] ,
                       "as": "userInfor"
                     }
