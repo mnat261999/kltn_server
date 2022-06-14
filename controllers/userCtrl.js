@@ -30,7 +30,7 @@ const userCtrl = {
             if (user) return res.status(400).json({ success: false, msg: "This email already exists." })
 
             if (!validatePass(password))
-                return res.status(400).json({success: false, msg: "Password must be at least 8 characters, one letter and one number." })
+                return res.status(400).json({ success: false, msg: "Password must be at least 8 characters, one letter and one number." })
 
             const passwordHash = await bcrypt.hash(password, 12)
 
@@ -42,18 +42,21 @@ const userCtrl = {
 
             const activation_token = createActivationToken(newUser)
 
-            const url = `${CLIENT_URL}/user/activate/${activation_token}`
+            const url = `${CLIENT_URL}/activate/${activation_token}`
 
 
             sendMail(email, url, "Verify your email address")
 
             res.status(200).json({
-                success:true,
+                success: true,
                 msg: "Register Success! Please activate your email to start.",
                 activation_token: activation_token
             })
         } catch (err) {
-            return res.status(500).json({ msg: err.message })
+            return res.status(500).json({
+                success: false,
+                msg: err.message
+            })
         }
     },
     activateEmail: async (req, res) => {
@@ -63,7 +66,7 @@ const userCtrl = {
 
             const { fullname, username, email, password, dob, gender } = user
             const check = await Users.findOne({ email })
-            if (check) return res.status(400).json({success: false, msg: "This email already exists." })
+            if (check) return res.status(400).json({ success: false, msg: "This email already exists." })
 
             const format_dob = Date(dob)
 
@@ -86,9 +89,9 @@ const userCtrl = {
 
             //console.log(userNew._id.toHexString())
 
-            res.status(200).json({ 
-                success:true,
-                msg: "Account has been activated!" 
+            res.status(200).json({
+                success: true,
+                msg: "Account has been activated!"
             })
         } catch (err) {
             return res.status(500).json({ msg: err.message })
@@ -97,11 +100,13 @@ const userCtrl = {
     login: async (req, res) => {
         try {
             const { email, password } = req.body
+            if (!email || !password)
+                return res.status(400).json({ success: false, msg: "Please fill in all fields." })
             const user = await Users.findOne({ email })
-            if (!user) return res.status(400).json({success: false, msg: "This email does not exist." })
+            if (!user) return res.status(400).json({ success: false, msg: "This email does not exist." })
 
             const isMatch = await bcrypt.compare(password, user.password)
-            if (!isMatch) return res.status(400).json({success: false, msg: "Password is incorrect" })
+            if (!isMatch) return res.status(400).json({ success: false, msg: "Password is incorrect" })
 
             const refresh_token = createRefreshToken({ id: user._id })
             const access_token = createAccessToken({ id: user._id })
@@ -112,11 +117,18 @@ const userCtrl = {
                 maxAge: 7 * 24 * 60 * 60 * 1000 //7 days
             })
 
-            //console.log(user)
-            res.status(200).json({ 
-                success:true,
+
+            res.status(200).json({
+                success: true,
                 msg: "Login success!",
-                access_token: access_token
+                data: {
+                    access_token: access_token,
+                    user: {
+                        ...user._doc,
+                        password: '',
+                        blockedBy: []
+                    }
+                }
             })
         } catch (err) {
             return res.status(500).json({ msg: err.message })
@@ -128,16 +140,16 @@ const userCtrl = {
 
             //console.log(req.cookies)
 
-            if (!rf_token) return res.status(400).json({success: false, msg: 'Please login now!' })
+            if (!rf_token) return res.status(400).json({ success: false, msg: 'Please login now!' })
 
             jwt.verify(rf_token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
-                if (err) { return res.status(400).json({success: false, msg: 'Please login now!' }) }
+                if (err) { return res.status(400).json({ success: false, msg: 'Please login now!' }) }
 
                 //console.log(user)
                 const access_token = createAccessToken({ id: user.id })
-                res.status(200).json({ 
-                    success:true, 
-                    access_token:access_token
+                res.status(200).json({
+                    success: true,
+                    access_token: access_token
                 })
             })
         } catch (err) {
@@ -148,14 +160,14 @@ const userCtrl = {
         try {
             const { email } = req.body
             const user = await Users.findOne({ email })
-            if (!user) return res.status(400).json({success: false, msg: "This email does not exist." })
+            if (!user) return res.status(400).json({ success: false, msg: "This email does not exist." })
 
             const access_token = createAccessToken({ id: user._id })
             const url = `${CLIENT_URL}/user/reset/${access_token}`
 
             sendMail(email, url, "Reset your password")
-            res.status(200).json({ 
-                success:true,
+            res.status(200).json({
+                success: true,
                 msg: "Re-send the password, please check your email.",
                 access_token: access_token
             })
@@ -175,9 +187,9 @@ const userCtrl = {
             })
 
             //console.log("Hash: " + password)
-            res.status(200).json({ 
-                success:true, 
-                msg: "Password successfully changed!" 
+            res.status(200).json({
+                success: true,
+                msg: "Password successfully changed!"
             })
         } catch (err) {
             return res.status(500).json({ msg: err.message })
@@ -186,9 +198,9 @@ const userCtrl = {
     logout: async (req, res) => {
         try {
             res.clearCookie('refreshtoken', { path: '/user/refresh_token' })
-            return res.status(200).json({ 
-                success:true, 
-                msg: "Logged out." 
+            return res.status(200).json({
+                success: true,
+                msg: "Logged out."
             })
         } catch (err) {
             return res.status(500).json({ msg: err.message })
@@ -255,9 +267,9 @@ const userCtrl = {
                 .exec((err, users) => {
                     console.log(err)
                     if (err) return res.status(400).send(err);
-                    return res.status(200).json({ 
-                        success:true, 
-                        data:users 
+                    return res.status(200).json({
+                        success: true,
+                        data: users
                     });
                 })
         } catch (err) {
@@ -294,9 +306,9 @@ const userCtrl = {
 
                 .select("_id avatar fullname username")
 
-            return res.status(200).json({ 
-                success:true,
-                data:users 
+            return res.status(200).json({
+                success: true,
+                data: users
             })
         } catch (err) {
             return res.status(500).json({ msg: err.message })
@@ -320,9 +332,9 @@ const userCtrl = {
             })
                 .select('-password -request -blockedBy')
 
-            return res.status(200).json({ 
-                success:true,
-                data:userInfor 
+            return res.status(200).json({
+                success: true,
+                data: userInfor
             })
 
         } catch (err) {
@@ -333,9 +345,9 @@ const userCtrl = {
         try {
             const user = await Users.findById(req.user.id).select('-blockedBy')
 
-            return res.status(200).json({ 
-                success:true,
-                data:user 
+            return res.status(200).json({
+                success: true,
+                data: user
             })
 
         } catch (err) {
@@ -346,7 +358,7 @@ const userCtrl = {
         try {
             const { fullname, username, email, gender, dob, website } = req.body
             if (!fullname || !username || !email || !dob || !gender)
-                return res.status(400).json({success: false, msg: "Please fill in all fields." })
+                return res.status(400).json({ success: false, msg: "Please fill in all fields." })
 
             const format_dob = Date(dob)
 
@@ -354,9 +366,9 @@ const userCtrl = {
                 fullname, username, email, gender, dob: format_dob, address, website
             })
 
-            return res.status(200).json({ 
-                success:true,
-                msg: "Update Success!" 
+            return res.status(200).json({
+                success: true,
+                msg: "Update Success!"
             })
         } catch (err) {
             return res.status(500).json({ msg: err.message })
@@ -430,52 +442,52 @@ const userCtrl = {
 
             const users = await Users.aggregate([
                 {
-					"$match": {
-						"$and": [
-							{
-								"_id": {
-									"$nin": [...user.following, mongoose.Types.ObjectId(req.user.id)]
-								}
-							},
-							{
-								"_id": {
-									"$nin": user.blockedUsers
-								}
-							},
-							{
-								"_id": {
-									"$nin": user.blockedBy
-								}
-							}
-						]
-					}
-				},
-                {
-                    "$sample":{
-                        "size" : Number(num)
+                    "$match": {
+                        "$and": [
+                            {
+                                "_id": {
+                                    "$nin": [...user.following, mongoose.Types.ObjectId(req.user.id)]
+                                }
+                            },
+                            {
+                                "_id": {
+                                    "$nin": user.blockedUsers
+                                }
+                            },
+                            {
+                                "_id": {
+                                    "$nin": user.blockedBy
+                                }
+                            }
+                        ]
                     }
                 },
                 {
-                    "$lookup":{
-                        "from": "users",
-						"localField": "followers",
-						"foreignField": "_id",
-						"as": "followers"
+                    "$sample": {
+                        "size": Number(num)
                     }
                 },
                 {
-                    "$lookup":{
+                    "$lookup": {
                         "from": "users",
-						"localField": "following",
-						"foreignField": "_id",
-						"as": "following"
+                        "localField": "followers",
+                        "foreignField": "_id",
+                        "as": "followers"
+                    }
+                },
+                {
+                    "$lookup": {
+                        "from": "users",
+                        "localField": "following",
+                        "foreignField": "_id",
+                        "as": "following"
                     }
                 }
             ]).project("-password -request -blockedBy -blockedUsers -role")
 
             return res.status(200).json({
                 success: true,
-                data:users
+                data: users
             })
         } catch (err) {
             return res.status(500).json({ msg: err.message })
@@ -494,7 +506,7 @@ function validatePass(pass) {
 }
 
 const createActivationToken = (payload) => {
-    return jwt.sign(payload, process.env.ACTIVATION_TOKEN_SECRET, { expiresIn: '1m' })
+    return jwt.sign(payload, process.env.ACTIVATION_TOKEN_SECRET, { expiresIn: '10m' })
 }
 
 const createAccessToken = (payload) => {
