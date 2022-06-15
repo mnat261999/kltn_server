@@ -142,14 +142,18 @@ const userCtrl = {
 
             if (!rf_token) return res.status(400).json({ success: false, msg: 'Please login now!' })
 
-            jwt.verify(rf_token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+            jwt.verify(rf_token, process.env.REFRESH_TOKEN_SECRET, async (err, user) => {
                 if (err) { return res.status(400).json({ success: false, msg: 'Please login now!' }) }
 
                 //console.log(user)
+                const userInfor = await Users.findById(user.id).select('-blockedBy')
                 const access_token = createAccessToken({ id: user.id })
                 res.status(200).json({
                     success: true,
-                    access_token: access_token
+                    data:{
+                        access_token: access_token,
+                        user: userInfor
+                    }
                 })
             })
         } catch (err) {
