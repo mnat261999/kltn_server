@@ -17,11 +17,11 @@ const uploadCtrl = {
             }
             const avatars = []
 
-            for(var i = 0; i<files.length;i++){
+            for(var i = 0; i < files.length; i++){
                 const params = {
                     Bucket: `${process.env.AWS_PUBLIC_BUCKET_NAME}/avatar`,
-                    Key: `${uuidv4()}${files[i].originalname}`,
-                    Body: `${uuidv4()}-${files[i].originalname}`,
+                    Key: `${uuidv4()}_${files[i].originalname}`,
+                    Body: files[i].buffer,
                     ACL:'public-read-write'
                 };
 
@@ -55,8 +55,8 @@ const uploadCtrl = {
             for(var i = 0; i<files.length;i++){
                 const params = {
                     Bucket: `${process.env.AWS_PUBLIC_BUCKET_NAME}/cover`,
-                    Key: `${uuidv4()}${files[i].originalname}`,
-                    Body: `${uuidv4()}-${files[i].originalname}`,
+                    Key: `${uuidv4()}_${files[i].originalname}`,
+                    Body: files[i].buffer,
                     ACL:'public-read-write'
                 };
 
@@ -92,8 +92,8 @@ const uploadCtrl = {
             for(var i = 0; i<files.length;i++){
                 const params = {
                     Bucket: `${process.env.AWS_PUBLIC_BUCKET_NAME}/media`,
-                    Key: `${uuidv4()}${files[i].originalname}`,
-                    Body: `${uuidv4()}-${files[i].originalname}`,
+                    Key: `${uuidv4()}_${files[i].originalname}`,
+                    Body: files[i].buffer,
                     ACL:'public-read-write'
                 };
 
