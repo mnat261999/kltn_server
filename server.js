@@ -28,6 +28,7 @@ app.use("/api/avatar", require("./routes/avatarRouter"));
 app.use("/api/cover", require("./routes/coverRouter"));
 app.use("/api/post", require("./routes/postRouter"));
 app.use("/api/comment", require("./routes/commentRouter"));
+app.use("/api/policy", require("./routes/policyRouter"));
 
 
 
