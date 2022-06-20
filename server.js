@@ -76,7 +76,7 @@ const swaggerSpec = {
 
 const specs = swaggerJsDoc(swaggerSpec);
 app.get('/', (req,res) => {
-    res.send('Welcome Api Social');
+    res.send('Welcome Api Social Pets');
 })
 
 
