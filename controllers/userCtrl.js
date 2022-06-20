@@ -282,7 +282,7 @@ const userCtrl = {
     },
     searchUser: async (req, res) => {
         try {
-            let limit = req.query.limit ? parseInt(req.query.limit) : 3;
+            let limit = req.query.limit ? parseInt(req.query.limit) : 5;
             let skip = req.query.skip ? parseInt(req.query.skip) : 0;
 
             const matchRegex = new RegExp(req.query.keyword);
@@ -301,7 +301,8 @@ const userCtrl = {
                         { username: { $regex: matchRegex, $options: 'i' } },
                         { fullname: { $regex: matchRegex, $options: 'i' } }
                     ],
-                    _id: { $nin: blockList }
+                    _id: { $nin: blockList },
+                    role: { $ne: "admin" }
                 }
             )
                 .skip(skip)

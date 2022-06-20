@@ -29,6 +29,8 @@ app.use("/api/cover", require("./routes/coverRouter"));
 app.use("/api/post", require("./routes/postRouter"));
 app.use("/api/comment", require("./routes/commentRouter"));
 app.use("/api/policy", require("./routes/policyRouter"));
+app.use("/api/report", require("./routes/reportRouter"));
+
 
 
 
