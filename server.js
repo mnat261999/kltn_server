@@ -57,6 +57,9 @@ const swaggerSpec = {
 		servers: [
 			{
 				url: "http://localhost:2000/api",
+			},
+			{
+				url: "https://be-social-pet.herokuapp.com/api",
 			}
 		],
 		components: {
