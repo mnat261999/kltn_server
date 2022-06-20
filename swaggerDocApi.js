@@ -349,6 +349,28 @@
 
 /**
  * @swagger
+ * /user/cancel/invite/follow/{id}:
+ *  put:
+ *      summary: Cancel invite follow
+ *      security:
+ *          - Auth: []
+ *      tags: [Users]
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            required: true
+ *            schema:
+ *              type: string
+ *            description: id of the user you want to cancel the invite to follow
+ *      responses:
+ *       200:
+ *         description: 
+ *       500:
+ *         description: Some server error
+ */
+
+/**
+ * @swagger
  * /user/declinefollow/{id}:
  *  put:
  *      summary: Decline follow

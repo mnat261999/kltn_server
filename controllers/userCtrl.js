@@ -398,6 +398,20 @@ const userCtrl = {
             return res.status(500).json({ msg: err.message })
         }
     },
+    cancelInviteFollow: async (req, res) =>{
+        try {
+
+            await Users.findByIdAndUpdate(req.params.id, {
+                $pull: { request: req.user.id }
+            })
+
+            return res.status(200).json({
+                success: true
+            })
+        } catch (err) {
+            return res.status(500).json({ msg: err.message })
+        }
+    },
     declineFollow: async (req, res) => {
         try {
             await Users.findByIdAndUpdate(req.user.id, {
