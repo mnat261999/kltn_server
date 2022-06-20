@@ -5,6 +5,8 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const SocketServer = require('./socketServer')
 const bcrypt = require('bcrypt')
+const swaggerUI = require("swagger-ui-express");
+const swaggerJsDoc = require("swagger-jsdoc");
 const Users = require('./models/userModel')
 
 const app = express();
@@ -20,6 +22,61 @@ const io = require('socket.io')(http)
 io.on('connection', socket => {
 	SocketServer(socket)
 })
+
+/* const swaggerOptions = {
+	swaggerDefinition: {
+		openapi: '3.0.0',
+		info: {
+			title: 'Hello World',
+			version: '1.0.0',
+		},
+		servers: [
+			{
+				url: "http://localhost:2000/api",
+			}
+		],
+		securityDefinitions: {
+			api_key: {
+				type: 'apiKey',
+				name: 'Authorization',
+				in: 'header',
+				description: 'Requests should pass an api_key header'
+			}
+		}
+	},
+	apis: ["swaggerDocApi.js"], // files containing annotations as above
+}; */
+
+const swaggerSpec = {
+	definition: {
+		openapi: '3.0.1',
+		info: {
+			title: 'Express-JWT',
+			version: '1.0.0',
+		},
+		servers: [
+			{
+				url: "http://localhost:2000/api",
+			}
+		],
+		components: {
+			securitySchemes: {
+				Auth: {
+					type: 'apiKey',
+					name: 'Authorization',
+					in: 'header',
+					description: 'Requests should pass an api_key header'
+				},
+			},
+		},
+	},
+	apis: ['swaggerDocApi.js'],
+};
+
+
+const specs = swaggerJsDoc(swaggerSpec);
+app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
+
 
 // Routes
 app.use("/api/user", require("./routes/userRouter"));
@@ -50,21 +107,21 @@ mongoose.connect(
 
 		const checkAdmin = users.some(u => u.role == 'admin')
 
-		if(checkAdmin == false){
+		if (checkAdmin == false) {
 			const passwordHash = await bcrypt.hash(process.env.ADMIN_PASSWORD, 12)
 			const newAdmin = new Users({
-				fullname: process.env.ADMIN_NAME, username:process.env.ADMIN_USERNAME,
+				fullname: process.env.ADMIN_NAME, username: process.env.ADMIN_USERNAME,
 				email: process.env.ADMIN_EMAIL,
-				password:passwordHash,
+				password: passwordHash,
 				dob: Date.now(),
 				gender: process.env.ADMIN_GENDER,
 				role: 'admin'
 			})
-	
+
 			await newAdmin.save()
-	
+
 			console.log("Admin create");
-		}else{ console.log("Admin exists") ;}
+		} else { console.log("Admin exists"); }
 	}
 );
 

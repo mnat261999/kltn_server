@@ -348,6 +348,7 @@ const userCtrl = {
     },
     getUserLogin: async (req, res) => {
         try {
+            console.log(req.user.id)
             const user = await Users.findById(req.user.id).select('-blockedBy')
 
             return res.status(200).json({
@@ -361,7 +362,7 @@ const userCtrl = {
     },
     updateUser: async (req, res) => {
         try {
-            const { fullname, username, email, gender, dob, website } = req.body
+            const { fullname, username, email, gender, dob, address, website } = req.body
             if (!fullname || !username || !email || !dob || !gender)
                 return res.status(400).json({ success: false, msg: "Please fill in all fields." })
 
@@ -381,7 +382,7 @@ const userCtrl = {
     },
     askFollow: async (req, res) => {
         try {
-            const ask = await Users.findByIdAndUpdate(req.params.followId, {
+            const ask = await Users.findByIdAndUpdate(req.params.id, {
                 $addToSet: { request: req.user.id }
             }, {
                 new: true
@@ -462,6 +463,11 @@ const userCtrl = {
                             {
                                 "_id": {
                                     "$nin": user.blockedBy
+                                }
+                            },
+                            {
+                                "role": {
+                                    "$ne": "admin"
                                 }
                             }
                         ]
