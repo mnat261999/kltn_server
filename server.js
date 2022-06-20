@@ -75,6 +75,11 @@ const swaggerSpec = {
 
 
 const specs = swaggerJsDoc(swaggerSpec);
+app.get('/', (req,res) => {
+    res.send('Welcome Api Social');
+})
+
+
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
 
 
