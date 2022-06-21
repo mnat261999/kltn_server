@@ -43,6 +43,18 @@ const avatarCtrl = {
             return res.status(500).json({ msg: err.message })
         }
     },
+    getAllAvatarByIdUser: async (req, res) => {
+        try {
+            const avatars = await Avatars.find({ user: req.params.id })
+
+            res.status(200).json({
+                success: true,
+                data: avatars
+            })
+        } catch (err) {
+            return res.status(500).json({ msg: err.message })
+        }
+    },
     deleteAvatar: async (req, res) => {
         try {
             const user = await Users.findById(req.user.id)

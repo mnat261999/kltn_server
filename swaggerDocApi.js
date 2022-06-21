@@ -456,3 +456,193 @@
  *       500:
  *         description: Some server error
  */
+
+/**
+ * @swagger
+ * /avatar/update:
+ *   put:
+ *     summary: Update avatar for user
+ *     security:
+ *          - Auth: []
+ *     tags: [Avatars]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *              type: object
+ *              properties:
+ *                  avatar:
+ *                      type: object
+ *                      example: {"key": "avatar/90ab430b-6ada-4f82-87f4-4c22a79db346_B612_20200326_093040_724.jpg","url": "https://social-pet-bucket.s3.amazonaws.com/avatar/90ab430b-6ada-4f82-87f4-4c22a79db346_B612_20200326_093040_724.jpg"}
+ *     responses:
+ *       200:
+ *         description: 
+ *       500:
+ *         description: Some server error
+ */
+
+/**
+ * @swagger
+ * /avatar/all:
+ *  get:
+ *      summary: Get avatar by user login
+ *      security:
+ *          - Auth: []
+ *      tags: [Avatars]
+ *      responses:
+ *       200:
+ *         description: 
+ *       500:
+ *         description: Some server error
+ */
+
+/**
+ * @swagger
+ * /avatar/all/{id}:
+ *  get:
+ *      summary: Get avatar by user id
+ *      security:
+ *          - Auth: []
+ *      tags: [Avatars]
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            required: true
+ *            schema:
+ *              type: string
+ *      responses:
+ *       200:
+ *         description: 
+ *       500:
+ *         description: Some server error
+ */
+
+/**
+ * @swagger
+ * /avatar/delete/{id}:
+ *  delete:
+ *      summary: Delete avatar by id of Avatar
+ *      security:
+ *          - Auth: []
+ *      tags: [Avatars]
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            required: true
+ *            schema:
+ *              type: string
+ *      responses:
+ *       200:
+ *         description: 
+ *       500:
+ *         description: Some server error
+ */
+
+/**
+ * @swagger
+ * /upload/cover:
+ *  post:
+ *      summary: Upload cover to aws s3
+ *      security:
+ *          - Auth: []
+ *      tags: [Covers]
+ *      requestBody:
+ *          content:
+ *               multipart/form-data:
+ *                   schema:
+ *                       type: object
+ *                       properties:
+ *                           files:
+ *                               type: array
+ *                               items:
+ *                                   type: string
+ *                                   format: binary
+ *      responses:
+ *       200:
+ *         description: 
+ *       500:
+ *         description: Some server error
+ */
+
+/**
+ * @swagger
+ * /cover/update:
+ *   put:
+ *     summary: Update cover for user
+ *     security:
+ *          - Auth: []
+ *     tags: [Covers]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *              type: object
+ *              properties:
+ *                  cover:
+ *                      type: object
+ *                      example: {"key": "cover/f92f981b-8663-449b-a231-59227887b27c_1614620041_266888_url.jpeg","url": "https://social-pet-bucket.s3.amazonaws.com/cover/f92f981b-8663-449b-a231-59227887b27c_1614620041_266888_url.jpeg"}
+ *     responses:
+ *       200:
+ *         description: 
+ *       500:
+ *         description: Some server error
+ */
+
+/**
+ * @swagger
+ * /cover/all:
+ *  get:
+ *      summary: Get cover by user login
+ *      security:
+ *          - Auth: []
+ *      tags: [Covers]
+ *      responses:
+ *       200:
+ *         description: 
+ *       500:
+ *         description: Some server error
+ */
+
+/**
+ * @swagger
+ * /cover/all/{id}:
+ *  get:
+ *      summary: Get cover by user id
+ *      security:
+ *          - Auth: []
+ *      tags: [Covers]
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            required: true
+ *            schema:
+ *              type: string
+ *      responses:
+ *       200:
+ *         description: 
+ *       500:
+ *         description: Some server error
+ */
+
+/**
+ * @swagger
+ * /cover/delete/{id}:
+ *  delete:
+ *      summary: Delete cover by id of Cover
+ *      security:
+ *          - Auth: []
+ *      tags: [Covers]
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            required: true
+ *            schema:
+ *              type: string
+ *      responses:
+ *       200:
+ *         description: 
+ *       500:
+ *         description: Some server error
+ */

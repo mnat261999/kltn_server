@@ -44,6 +44,18 @@ const coverCtrl = {
             return res.status(500).json({ msg: err.message })
         }
     },
+    getAllCoverByIdUser: async (req, res) =>{
+        try {
+            const covers = await Covers.find({user:req.params.id})
+
+            res.status(200).json({ 
+                success:true,
+                data:covers
+            })
+        } catch (err) {
+            return res.status(500).json({ msg: err.message })
+        }
+    },
     deleteCover: async (req, res) => {
         try {
             const user = await Users.findById(req.user.id)
