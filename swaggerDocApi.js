@@ -3,7 +3,7 @@
  * /user/register:
  *   post:
  *     summary: Register new account
- *     tags: [Users]
+ *     tags: [Users-Authen]
  *     requestBody:
  *       required: true
  *       content:
@@ -41,7 +41,7 @@
  * /user/activation:
  *   post:
  *     summary: Acctivation account
- *     tags: [Users]
+ *     tags: [Users-Authen]
  *     requestBody:
  *       required: true
  *       content:
@@ -64,7 +64,7 @@
  * /user/login:
  *   post:
  *     summary: Login to account
- *     tags: [Users]
+ *     tags: [Users-Authen]
  *     requestBody:
  *       required: true
  *       content:
@@ -90,7 +90,7 @@
  * /user/refresh_token:
  *   post:
  *     summary: Refresh token
- *     tags: [Users]
+ *     tags: [Users-Authen]
  *     responses:
  *       200:
  *         description: 
@@ -103,7 +103,7 @@
  * /user/forgot:
  *   post:
  *     summary: Forgot password
- *     tags: [Users]
+ *     tags: [Users-Authen]
  *     requestBody:
  *       required: true
  *       content:
@@ -128,7 +128,7 @@
  *     summary: Reset password
  *     security:
  *          - Auth: []
- *     tags: [Users]
+ *     tags: [Users-Authen]
  *     requestBody:
  *       required: true
  *       content:
@@ -151,65 +151,8 @@
  * /user/logout:
  *   post:
  *     summary: Logout
- *     tags: [Users]
+ *     tags: [Users-Authen]
  *     responses:
- *       200:
- *         description: 
- *       500:
- *         description: Some server error
- */
-
-/**
- * @swagger
- * /user/block/{id}:
- *  put:
- *      summary: Block user
- *      security:
- *          - Auth: []
- *      tags: [Users]
- *      parameters:
- *          - in: path
- *            name: id
- *            required: true
- *            schema:
- *              type: string
- *      responses:
- *       200:
- *         description: 
- *       500:
- *         description: Some server error
- */
-
-/**
- * @swagger
- * /user/unblock/{id}:
- *  put:
- *      summary: Unblock user
- *      security:
- *          - Auth: []
- *      tags: [Users]
- *      parameters:
- *          - in: path
- *            name: id
- *            required: true
- *            schema:
- *              type: string
- *      responses:
- *       200:
- *         description: 
- *       500:
- *         description: Some server error
- */
-
-/**
- * @swagger
- * /user/list/block:
- *  get:
- *      summary: List of blocked users
- *      security:
- *          - Auth: []
- *      tags: [Users]
- *      responses:
  *       200:
  *         description: 
  *       500:
@@ -328,12 +271,89 @@
 
 /**
  * @swagger
+ * /user/suggestions_user:
+ *  get:
+ *      summary: Suggest user
+ *      security:
+ *          - Auth: []
+ *      tags: [Users]
+ *      parameters:
+ *          - in: query
+ *            name: num
+ *            schema:
+ *              type: number
+ *      responses:
+ *       200:
+ *         description: 
+ *       500:
+ *         description: Some server error
+ */
+
+/**
+ * @swagger
+ * /user/block/{id}:
+ *  put:
+ *      summary: Block user
+ *      security:
+ *          - Auth: []
+ *      tags: [Users-Block]
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            required: true
+ *            schema:
+ *              type: string
+ *      responses:
+ *       200:
+ *         description: 
+ *       500:
+ *         description: Some server error
+ */
+
+/**
+ * @swagger
+ * /user/unblock/{id}:
+ *  put:
+ *      summary: Unblock user
+ *      security:
+ *          - Auth: []
+ *      tags: [Users-Block]
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            required: true
+ *            schema:
+ *              type: string
+ *      responses:
+ *       200:
+ *         description: 
+ *       500:
+ *         description: Some server error
+ */
+
+/**
+ * @swagger
+ * /user/list/block:
+ *  get:
+ *      summary: List of blocked users
+ *      security:
+ *          - Auth: []
+ *      tags: [Users-Block]
+ *      responses:
+ *       200:
+ *         description: 
+ *       500:
+ *         description: Some server error
+ */
+
+/**
+ * @swagger
  * /user/askfollow/{id}:
  *  put:
  *      summary: Send invite follow
  *      security:
  *          - Auth: []
- *      tags: [Users]
+ *      tags: [Users-Follow]
  *      parameters:
  *          - in: path
  *            name: id
@@ -354,7 +374,7 @@
  *      summary: Cancel invite follow
  *      security:
  *          - Auth: []
- *      tags: [Users]
+ *      tags: [Users-Follow]
  *      parameters:
  *          - in: path
  *            name: id
@@ -376,7 +396,7 @@
  *      summary: Decline follow
  *      security:
  *          - Auth: []
- *      tags: [Users]
+ *      tags: [Users-Follow]
  *      parameters:
  *          - in: path
  *            name: id
@@ -397,33 +417,13 @@
  *      summary: Accept follow
  *      security:
  *          - Auth: []
- *      tags: [Users]
+ *      tags: [Users-Follow]
  *      parameters:
  *          - in: path
  *            name: id
  *            required: true
  *            schema:
  *              type: string
- *      responses:
- *       200:
- *         description: 
- *       500:
- *         description: Some server error
- */
-
-/**
- * @swagger
- * /user/suggestions_user:
- *  get:
- *      summary: Suggest user
- *      security:
- *          - Auth: []
- *      tags: [Users]
- *      parameters:
- *          - in: query
- *            name: num
- *            schema:
- *              type: number
  *      responses:
  *       200:
  *         description: 
