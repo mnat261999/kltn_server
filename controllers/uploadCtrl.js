@@ -12,6 +12,7 @@ const uploadCtrl = {
     uploadAvatar:async (req, res) =>{
         try {
             const files = req.files; 
+  
             if(files[0].mimetype !== 'image/jpeg' && files[0].mimetype !== 'image/png'){
                 return res.status(400).json({success: false, msg: "File format is incorrect."})
             }

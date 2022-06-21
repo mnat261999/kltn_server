@@ -430,3 +430,29 @@
  *       500:
  *         description: Some server error
  */
+
+/**
+ * @swagger
+ * /upload/avatar:
+ *  post:
+ *      summary: Upload avatar to aws s3
+ *      security:
+ *          - Auth: []
+ *      tags: [Users]
+ *      requestBody:
+ *          content:
+ *               multipart/form-data:
+ *                   schema:
+ *                       type: object
+ *                       properties:
+ *                           files:
+ *                               type: array
+ *                               items:
+ *                                   type: string
+ *                                   format: binary
+ *      responses:
+ *       200:
+ *         description: 
+ *       500:
+ *         description: Some server error
+ */

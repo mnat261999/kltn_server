@@ -4,6 +4,12 @@ const reportCtrl = {
         try {
             const {reportType, policies, reportId} = req.body
 
+            if(!reportType) res.status(400).json({ success: false, msg: "Please fill in reportType." })
+
+            if(!policies) res.status(400).json({ success: false, msg: "Please fill in policies." })
+
+            if(!reportId) res.status(400).json({ success: false, msg: "Please fill in policies." })
+
             let newReport
 
             if(reportType == 'post'){

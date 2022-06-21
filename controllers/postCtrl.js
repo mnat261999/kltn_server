@@ -19,7 +19,7 @@ const postCtrl = {
 				const post = await newPost.save()
 
 				for (const m of medias) {
-					await addMedia(post._id, m.media, m.typeMedia)
+					await addMedia(post._id, m.media, m.typeMedia, req.user.id)
 				}
 
 				return res.status(200).json({ success: true })
@@ -39,7 +39,7 @@ const postCtrl = {
 				const post = await newPost.save()
 
 				for (const m of medias) {
-					await addMedia(post._id, m.media, m.typeMedia)
+					await addMedia(post._id, m.media, m.typeMedia, req.user.id)
 				}
 
 				return res.status(200).json({ success: true })
@@ -198,7 +198,7 @@ const postCtrl = {
 				const post = await Posts.findById(req.params.id)
 
 				for (const m of medias) {
-					await addMedia(post._id, m.media, m.typeMedia)
+					await addMedia(post._id, m.media, m.typeMedia, req.user.id)
 				}
 
 				return res.status(200).json({ success: true })
@@ -210,7 +210,7 @@ const postCtrl = {
 				const post = await Posts.findById(req.params.id)
 
 				for (const m of medias) {
-					await addMedia(post._id, m.media, m.typeMedia)
+					await addMedia(post._id, m.media, m.typeMedia, req.user.id)
 				}
 
 				return res.status(200).json({ success: true })
@@ -381,9 +381,9 @@ const postCtrl = {
 	}
 };
 
-const addMedia = async (idPost, media, typeMedia) => {
+const addMedia = async (idPost, media, typeMedia, user) => {
 	const newMedia = new Medias({
-		post: idPost, media: media, typeMedia: typeMedia
+		post: idPost, media: media, typeMedia: typeMedia, user:user
 	})
 	return await newMedia.save()
 }
