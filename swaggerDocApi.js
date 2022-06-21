@@ -438,7 +438,7 @@
  *      summary: Upload avatar to aws s3
  *      security:
  *          - Auth: []
- *      tags: [Users]
+ *      tags: [Avatars]
  *      requestBody:
  *          content:
  *               multipart/form-data:
