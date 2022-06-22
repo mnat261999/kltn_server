@@ -24,6 +24,7 @@ router.put('/cancel/invite/follow/:id', auth, userCtrl.cancelInviteFollow )
 router.put('/declinefollow/:id', auth, userCtrl.declineFollow )
 router.put('/acceptfollow/:id', auth, userCtrl.acceptFollow )
 router.get('/suggestions_user', auth, userCtrl.suggestionUser)
+router.get('/:action/:userId', auth, userCtrl.getListFollowByUser)
 
 
 

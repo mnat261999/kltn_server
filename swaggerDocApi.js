@@ -433,6 +433,33 @@
 
 /**
  * @swagger
+ * /user/{action}/{userId}:
+ *  get:
+ *      summary: Get list follower or following
+ *      security:
+ *          - Auth: []
+ *      tags: [Users-Follow]
+ *      parameters:
+ *          - in: path
+ *            name: action
+ *            required: true
+ *            schema:
+ *              type: string
+ *            description: action = enum[follower, following]
+ *          - in: path
+ *            name: userId
+ *            required: true
+ *            schema:
+ *              type: string
+ *      responses:
+ *       200:
+ *         description: 
+ *       500:
+ *         description: Some server error
+ */
+
+/**
+ * @swagger
  * /upload/avatar:
  *  post:
  *      summary: Upload avatar to aws s3
@@ -646,3 +673,34 @@
  *       500:
  *         description: Some server error
  */
+
+/**
+ * @swagger
+ * /post/create:
+ *   post:
+ *     summary: Create post
+ *     security:
+ *          - Auth: []
+ *     tags: [Posts]
+ *     requestBody:
+ *       description: Không thể để trống cả hai trường
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *              type: object
+ *              properties:
+ *                  content:
+ *                      type: string
+ *                      example: content example
+ *                  medias:
+ *                      type: array
+ *                      example:  [{"media": {"key": "media/ef1042d2-4850-4419-a38c-be492ecfad9e_9720c057-aba6-4b8b-93dc-04ad0f98f029_meo-muop-giong-meo-pho-bien-tren-the-gioi.jpg","url": "https://social-pet-bucket.s3.amazonaws.com/media/ef1042d2-4850-4419-a38c-be492ecfad9e_9720c057-aba6-4b8b-93dc-04ad0f98f029_meo-muop-giong-meo-pho-bien-tren-the-gioi.jpg"},"typeMedia": "image/jpeg"}]
+ *     responses:
+ *       200:
+ *         description: 
+ *       500:
+ *         description: Some server error
+ */
+
+

@@ -150,7 +150,7 @@ const userCtrl = {
                 const access_token = createAccessToken({ id: user.id })
                 res.status(200).json({
                     success: true,
-                    data:{
+                    data: {
                         access_token: access_token,
                         user: userInfor
                     }
@@ -267,7 +267,7 @@ const userCtrl = {
             console.log(user)
 
             Users.find({ "_id": { $in: user.blockedUsers } })
-                .select('username _id avatar')
+                .select('fullname username _id avatar')
                 .exec((err, users) => {
                     console.log(err)
                     if (err) return res.status(400).send(err);
@@ -398,7 +398,7 @@ const userCtrl = {
             return res.status(500).json({ msg: err.message })
         }
     },
-    cancelInviteFollow: async (req, res) =>{
+    cancelInviteFollow: async (req, res) => {
         try {
 
             await Users.findByIdAndUpdate(req.params.id, {
@@ -514,6 +514,39 @@ const userCtrl = {
                 success: true,
                 data: users
             })
+        } catch (err) {
+            return res.status(500).json({ msg: err.message })
+        }
+    },
+    getListFollowByUser: async (req, res) => {
+        try {
+            const user = await Users.findById(req.params.userId)
+
+            if (req.params.action == 'follower') {
+                Users.find({ "_id": { $in: user.followers } })
+                    .select('fullname username _id avatar')
+                    .exec((err, users) => {
+                        console.log(err)
+                        if (err) return res.status(400).send(err);
+                        return res.status(200).json({
+                            success: true,
+                            data: users
+                        });
+                    })
+            } else if(req.params.action == 'following'){
+                Users.find({ "_id": { $in: user.following } })
+                .select('fullname username _id avatar')
+                .exec((err, users) => {
+                    console.log(err)
+                    if (err) return res.status(400).send(err);
+                    return res.status(200).json({
+                        success: true,
+                        data: users
+                    });
+                })
+            }else {
+                return res.status(500).json();
+            }
         } catch (err) {
             return res.status(500).json({ msg: err.message })
         }

@@ -9,9 +9,12 @@ const postCtrl = {
 		try {
 			const { content, medias } = req.body;
 
-			if (!content && !medias) {
+			console.log(medias.length)
+
+			if (!content && medias.length == 0) {
 				return res.status(400).json({success: false,  msg: "You cannot submit status empty" })
-			} else if (content && medias) {
+			} else if (content && medias.length > 0) {
+				console.log('content && medias')
 				const newPost = new Posts({
 					content: content, postedBy: req.user.id
 				})
@@ -23,7 +26,8 @@ const postCtrl = {
 				}
 
 				return res.status(200).json({ success: true })
-			} else if (content && !medias) {
+			} else if (content && medias.length == 0) {
+				console.log('content && !medias')
 				const newPost = new Posts({
 					content: content, postedBy: req.user.id
 				})
@@ -31,7 +35,8 @@ const postCtrl = {
 				await newPost.save()
 
 				return res.status(200).json({ success: true })
-			} else if (medias && !content) {
+			} else if (!content && medias.length > 0 ) {
+				console.log('medias && !content')
 				const newPost = new Posts({
 					content: '', postedBy: req.user.id
 				})
