@@ -57,13 +57,15 @@ const postCtrl = {
 		try {
 			const user = await Users.findById(req.user.id)
 
+			console.log([...user.following,...user.followers, mongoose.Types.ObjectId(req.user.id)])
+
 			const allPosts = await Posts.aggregate([
 				{
 					"$match": {
 						"$and": [
 							{
 								"postedBy": {
-									"$in": [...user.following, mongoose.Types.ObjectId(req.user.id)]
+									"$in": [...user.following,...user.followers, mongoose.Types.ObjectId(req.user.id)]
 								}
 							},
 							{
@@ -136,7 +138,7 @@ const postCtrl = {
 									"$and": [
 										{
 											"_id": {
-												"$in": [...user.following, mongoose.Types.ObjectId(req.user.id)]
+												"$in": [...user.following,...user.followers, mongoose.Types.ObjectId(req.user.id)]
 											}
 										},
 										{
@@ -188,15 +190,19 @@ const postCtrl = {
 	},
 	updatePost: async (req, res) => {
 		try {
+
+			const post = await Posts.findById(req.params.id)
+			if(post.postedBy.toString() != req.user.id) return res.status(400).json({success: false,  msg: "You can only edit posts created by you" })
+
 			const { content, medias, mediaIdDeleteList } = req.body;
 
-			if (mediaIdDeleteList) {
+			if (mediaIdDeleteList.length > 0) {
 				await Medias.deleteMany({ '_id': { '$in': mediaIdDeleteList } })
 			}
 
-			if (!content && !medias) {
+			if (!content && medias.length == 0 && mediaIdDeleteList.length == 0) {
 				return res.status(400).json({success: false,  msg: "You cannot submit status empty" })
-			} else if (content && medias) {
+			} else if (content && medias.length > 0) {
 
 				await Posts.findOneAndUpdate({ _id: req.params.id }, { content: content })
 
@@ -207,11 +213,11 @@ const postCtrl = {
 				}
 
 				return res.status(200).json({ success: true })
-			} else if (content && !medias) {
+			} else if (content && medias.length == 0) {
 				await Posts.findOneAndUpdate({ _id: req.params.id }, { content: content })
 
 				return res.status(200).json({ success: true })
-			} else if (!content && medias) {
+			} else if (!content && medias.length > 0 ) {
 				const post = await Posts.findById(req.params.id)
 
 				for (const m of medias) {
