@@ -363,8 +363,8 @@ const userCtrl = {
     updateUser: async (req, res) => {
         try {
             const { fullname, username, email, gender, dob, address, website } = req.body
-            if (!fullname || !username || !email || !dob || !gender)
-                return res.status(400).json({ success: false, msg: "Please fill in all fields." })
+            if (!fullname )
+                return res.status(400).json({ success: false, msg: "Please enter full name." })
 
             const format_dob = Date(dob)
 
